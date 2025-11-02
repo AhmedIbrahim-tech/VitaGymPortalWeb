@@ -1,0 +1,76 @@
+﻿
+
+@{
+    ViewData["Title"] = "Delete Member";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            @* The Modal Structure *@
+            <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+
+                        @* Form for Submission *@
+                        <form asp-action="DeleteConfirmed" method="post">
+
+                            @* Modal Header *@
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel">Delete Confirmation</h5>
+                                @* Use a link to the index action instead of btn-close to safely exit *@
+                                <a asp-controller="Member" asp-action="Index" class="btn-close" aria-label="Close"></a>
+                            </div>
+
+                            @* Modal Body (Content from the original card) *@
+                            <div class="modal-body text-center">
+
+                                <p class="fs-3 text-primary-color mb-4">Are you sure you want to delete this member?</p>
+
+                                @* CORRECTED: The class and role attributes are now correctly defined *@
+                                <div class="alert alert-warning text-start mt-4" role="alert">
+                                    <strong>Warning!</strong> This action cannot be undone. All member data will be permanently deleted.
+                                </div>
+
+                                @* Hidden Input to pass the Member ID for deletion *@
+                                <input type="hidden" name="id" value="@ViewBag.MemberId" />
+                            </div>
+
+                            @* Modal Footer (Buttons) *@
+                            <div class="modal-footer d-flex justify-content-center gap-3">
+                                @* Cancel Button (redirects to list) *@
+                                <a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary flex-fill">No</a>
+
+                                @* Confirm Button (submits form) *@
+                                <button type="submit" class="btn btn-danger btn-fill flex-fill">Yes</button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @* End Modal Structure *@
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Use JavaScript to immediately show the modal when the page is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if Bootstrap is available and the modal element exists
+            var modalElement = document.getElementById('deleteModal');
+            if (typeof bootstrap !== 'undefined' && modalElement) {
+                var deleteModal = new bootstrap.Modal(modalElement, {
+                    // Prevent closing by pressing the escape key or clicking outside
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                deleteModal.show();
+            }
+        });
+    </script>
+}

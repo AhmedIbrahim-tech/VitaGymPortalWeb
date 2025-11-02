@@ -1,0 +1,9 @@
+﻿using Microsoft.AspNetCore.Http;
+namespace Core.Services.AttachmentService
+{
+    public interface IAttachmentService
+    {
+        string? Upload(string folderName, IFormFile file);
+        bool Delete(string fileName, string folderName);
+    }
+}

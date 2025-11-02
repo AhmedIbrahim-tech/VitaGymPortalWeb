@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Infrastructure/Infrastructure.csproj" />
+  <Project Path="Web/Web.csproj" />
+  <Project Path="Core/Core.csproj" />
+</Solution>
+

@@ -1,0 +1,88 @@
+﻿/* --- New Modern Dark Footer --- */
+
+.footer-dark {
+    background-color: #0a1172; /* Your primary blue */
+    color: #adb5bd; /* Light gray text */
+    padding-top: 4rem;
+    padding-bottom: 1rem;
+}
+
+    .footer-dark .footer-logo {
+        max-width: 150px;
+        margin-bottom: 1rem;
+    }
+
+    .footer-dark .footer-tagline {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .footer-dark .footer-heading {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #ffffff;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer-dark .footer-links {
+        list-style: none;
+        padding-left: 0;
+    }
+
+        .footer-dark .footer-links li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-dark .footer-links a {
+            color: #adb5bd;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .footer-dark .footer-links a:hover {
+                color: #ffffff;
+                padding-left: 5px;
+            }
+
+    .footer-dark .social-icons {
+        margin-top: 1.5rem;
+    }
+
+        .footer-dark .social-icons a {
+            color: #adb5bd;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+            .footer-dark .social-icons a:hover {
+                color: #ffffff;
+                transform: scale(1.1);
+            }
+
+    .footer-dark .contact-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        color: #adb5bd;
+    }
+
+        .footer-dark .contact-item .bi {
+            font-size: 1.2rem;
+            color: #ffffff;
+            margin-right: 12px;
+            min-width: 20px;
+            margin-top: 3px;
+        }
+
+    .footer-dark .footer-copyright {
+        text-align: center;
+        padding-top: 1.5rem;
+        margin-top: 3rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.9rem;
+        color: #adb5bd;
+    }

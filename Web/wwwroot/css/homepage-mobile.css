@@ -1,0 +1,79 @@
+﻿/* --- Homepage Mobile-Only Fixes --- */
+/* This entire file only applies to screens SMALLER than 768px */
+@media (max-width: 767.98px) {
+
+    /* --- 1. NEW Mobile-Only Hero Section --- */
+
+    /* Shrink the main heading font size */
+    #mobile-hero-heading {
+        font-size: 2.5rem !important; /* Smaller than display-2 */
+        line-height: 1.2;
+    }
+
+    /* Constrain the hero image */
+    #mobile-hero-image {
+        max-height: 350px;
+        width: auto;
+    }
+
+    /* Style the new mobile stats section */
+    .stats-bar-mobile .stat-mobile {
+        text-align: center;
+        background-color: #f8f9fa; /* Light gray bg */
+        padding: 1rem 0.5rem;
+        border-radius: 8px;
+        height: 100%;
+    }
+
+        .stats-bar-mobile .stat-mobile h3 {
+            color: #6c757d; /* Muted text color */
+        }
+
+    /* --- 2. "About Us" & "Workout" Section Text --- */
+
+    /* Center the "About Us" and "Why Us" text sections */
+    .about .col-lg-6,
+    .why-us .col {
+        text-align: center;
+    }
+
+    .about .title,
+    .why-us .title {
+        justify-content: center !important; /* Center the "About Us" title */
+    }
+
+    /* Center the "Workout" section title */
+    .workout .title p.display-5 {
+        font-size: 2rem !important;
+    }
+
+
+    /* --- 3. "About Us" Image Fix (Hide on Mobile) --- */
+
+    .about-characters-container {
+        display: none !important;
+    }
+
+
+    /* --- 4. "Why Us" Number Style Fix (01, 02, 03) --- */
+
+    /* Change alignment to stack text correctly next to the new circle */
+    .why-us .featutes .feature {
+        align-items: flex-start !important;
+        text-align: left;
+    }
+
+        /* This is the new circle style for 01, 02, 03 */
+        .why-us .featutes .feature .count {
+            background-color: #0a1172; /* Use your primary color */
+            color: white;
+            font-size: 1rem !important; /* Smaller font */
+            border-radius: 50%; /* Makes it a circle */
+            min-width: 40px; /* Fixed width */
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+}

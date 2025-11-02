@@ -1,0 +1,42 @@
+﻿/* --- Membership Page Styles --- */
+
+/* Fix for table overflow:
+   This stops the table text from wrapping,
+   which forces it to overflow and enables the scrollbar. */
+.table-responsive .table th,
+.table-responsive .table td {
+    white-space: nowrap;
+}
+
+/* --- Mobile-Only Styles for Header --- */
+@media (max-width: 767.98px) {
+
+    /* Reduce padding on the blue box */
+    .header-mobile-fix {
+        padding: 1.25rem !important; /* Was p-4 */
+        flex-direction: column; /* Stack header items */
+        align-items: flex-start !important;
+    }
+
+        /* Make the main heading smaller */
+        .header-mobile-fix h2 {
+            font-size: 1.75rem; /* Make heading smaller */
+        }
+
+        /* Make the sub-heading smaller */
+        .header-mobile-fix p {
+            font-size: 0.9rem; /* Make sub-text smaller */
+            margin-bottom: 1rem !important;
+        }
+
+        /* Make the "New Membership" button smaller */
+        .header-mobile-fix .btn-light {
+            font-size: 0.9rem;
+            padding: 0.5rem 0.75rem; /* Smaller padding */
+        }
+
+        /* Fix button alignment */
+        .header-mobile-fix .col.text-end {
+            text-align: left !important; /* Align button to the left */
+        }
+}
