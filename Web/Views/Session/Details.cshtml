@@ -1,14 +1,15 @@
-﻿@model SessionViewModel
+﻿@using Core.ViewModels.SessionViewModels
+@model SessionViewModel
 @{
     ViewData["Title"] = "Session Details";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-lg border-0">
-                <div class="card-header @(Model.Status == "Ongoing" ? "bg-success" : Model.Status == "Upcoming" ? "bg-primary" : "bg-secondary") text-white text-center py-4">
+            <div class="card shadow-lg border rounded-4">
+                <div class="card-header rounded-top-4 @(Model.Status == "Ongoing" ? "bg-success" : Model.Status == "Upcoming" ? "bg-primary" : "bg-secondary") text-white text-center py-4">
                     <i class="bi bi-calendar-event display-4 mb-3"></i>
                     <h2 class="mb-2">@Model.CategoryName</h2>
                     <span class="badge bg-light text-dark fs-6">@Model.Status</span>
@@ -16,7 +17,7 @@
 
                 <div class="card-body p-4">
                     <!-- Description -->
-                    <div class="mb-4 p-3 bg-light rounded">
+                    <div class="mb-4 p-3 rounded">
                         <h6 class="text-primary-color mb-2">
                             <i class="bi bi-file-text me-2"></i>Description
                         </h6>
@@ -47,7 +48,7 @@
                                     </div>
                                     <div>
                                         <small class="text-muted d-block">Capacity</small>
-                                        <strong>@Model.AvailableSlots / @Model.Capacity spots</strong>
+                                        <strong>@Model.AvailableSlots / @Model.Capacity slots</strong>
                                     </div>
                                 </div>
                             </div>
@@ -82,7 +83,7 @@
                         </div>
 
                         <div class="col-12">
-                            <div class="detail-box p-3 border rounded bg-light">
+                            <div class="detail-box p-3 border rounded">
                                 <div class="d-flex align-items-center">
                                     <div class="icon-box me-3">
                                         <i class="bi bi-hourglass-split text-primary-color fs-3"></i>
@@ -99,10 +100,10 @@
                     </div>
                 </div>
 
-                <div class="card-footer bg-white border-0 p-4">
-                    <div class="d-flex justify-content-between gap-2">
-                        <a asp-action="Index" class="btn btn-outline flex-fill">
-                            <i class="bi bi-arrow-left me-1"></i>Back to List
+                <div class="card-footer border-0 p-4">
+                    <div class="d-flex justify-content-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                            <i class="bi bi-arrow-left"></i> Back to List
                         </a>
                     </div>
                 </div>

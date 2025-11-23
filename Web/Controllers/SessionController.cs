@@ -1,145 +1,166 @@
-﻿namespace Web.Controllers
+﻿namespace Web.Controllers;
+
+[Authorize]
+public class SessionController(ISessionService _sessionService, IToastNotification _toastNotification) : Controller
 {
-    [Authorize]
-    public class SessionController : Controller
+    #region Get Sessions
+
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        private readonly ISessionService _sessionService;
+        var sessions = await _sessionService.GetAllSessionsAsync(cancellationToken);
 
-        public SessionController(ISessionService sessionService)
-        {
-            _sessionService = sessionService;
-        }
-        public IActionResult Index()
-        {
-            var sessions = _sessionService.GetAllSessions();
-            return View(sessions);
-        }
+        ViewData["Title"] = "Sessions";
 
-        public IActionResult Create()
+        if (sessions == null || !sessions.Any())
         {
-            LoadCategoriesDropDown();
-            LoadTrainersDropDown();
-            return View();
+            ViewData["EmptyIcon"] = "calendar-x";
+            ViewData["EmptyTitle"] = "No Sessions Available";
+            ViewData["EmptyMessage"] = "Create your first training session to get started";
         }
 
-        [HttpPost]
-        public IActionResult Create(CreateSessionViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-                ModelState.AddModelError("DataMissed", "Check Missing Data!!");
-                LoadCategoriesDropDown();
-                LoadTrainersDropDown();
-                return View(nameof(Create), input);
-            }
-
-            bool createSession = _sessionService.CreateSession(input);
-
-            if (createSession)
-                TempData["SuccessMessage"] = "Session Created Successfully!";
-            else
-            {
-                TempData["ErrorMessage"] = "Session Failed To Create!";
-                LoadCategoriesDropDown();
-                LoadTrainersDropDown();
-            }
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult Details(int Id)
-        {
-            var session = _sessionService.GetSessionByID(Id);
-            if (session == null)
-            {
-                TempData["ErrorMessage"] = "Session is Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(session);
-        }
-
-        public IActionResult Edit(int Id)
-        {
-            if(Id <= 0)
-            {
-                TempData["ErrorMessage"] = "ID Can not be Zero or Negative!";
-                return RedirectToAction(nameof(Index));
-            }
-            var session = _sessionService.GetSessionToUpdate(Id);
-            if (session == null)
-            {
-                TempData["ErrorMessage"] = "Session Can not be Edited!";
-                return RedirectToAction(nameof(Index));
-            }
-            LoadTrainersDropDown();
-            return View(session);
-        }
-
-        [HttpPost]
-        public IActionResult Edit([FromRoute] int Id, UpdateSessionViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-                LoadTrainersDropDown();
-                return View(input);
-            }
-
-            bool updateSession = _sessionService.UpdateSession(Id, input);
-
-            if (updateSession)
-                TempData["SuccessMessage"] = "Session Updated Successfully!";
-            else
-                TempData["ErrorMessage"] = "Session Failed To Update !";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult Delete(int Id)
-        {
-            if (Id <= 0)
-            {
-                TempData["ErrorMessage"] = "ID cannot be Null or Negative!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var session = _sessionService.GetSessionByID(Id);
-            if (session == null)
-            {
-                TempData["ErrorMessage"] = "session is Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewBag.SessionId = Id;
-            return View();
-
-        }
-        [HttpPost]
-        public IActionResult DeleteConfirmed([FromForm] int id)
-        {
-            var result = _sessionService.RemoveSession(id);
-
-            if (result)
-                TempData["SuccessMessage"] = "Session Deleted Successfully!";
-            else
-                TempData["ErrorMessage"] = "Session Cannot be Deleted!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-        #region Helper Methods
-        private void LoadCategoriesDropDown()
-        {
-            var categories = _sessionService.LoadCategoriesDropDown();
-            ViewBag.Categories = new SelectList(categories, "Id","Name");
-        }
-
-        private void LoadTrainersDropDown()
-        {
-            var trainers = _sessionService.LoadTrainersDropDown();
-            ViewBag.Trainers = new SelectList(trainers, "Id", "Name");
-        }
-        #endregion
+        return View(sessions);
     }
+
+    public async Task<IActionResult> Details(int id, CancellationToken cancellationToken = default)
+    {
+        var session = await _sessionService.GetSessionByIDAsync(id, cancellationToken);
+        if (session == null)
+        {
+            _toastNotification.AddErrorToastMessage("Session is Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+        return View(session);
+    }
+
+    #endregion
+
+    #region Create Session
+
+    public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
+    {
+        await LoadCategoriesDropDownAsync(cancellationToken);
+        await LoadTrainersDropDownAsync(cancellationToken);
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateSessionViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError("DataMissed", "Check Missing Data!!");
+            await LoadCategoriesDropDownAsync(cancellationToken);
+            await LoadTrainersDropDownAsync(cancellationToken);
+            return View(nameof(Create), input);
+        }
+
+        bool createSession = await _sessionService.CreateSessionAsync(input, cancellationToken);
+
+        if (createSession)
+            _toastNotification.AddSuccessToastMessage("Session Created Successfully!");
+        else
+        {
+            _toastNotification.AddErrorToastMessage("Session Failed To Create!");
+            await LoadCategoriesDropDownAsync(cancellationToken);
+            await LoadTrainersDropDownAsync(cancellationToken);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Update Session
+
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("ID Can not be Zero or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var session = await _sessionService.GetSessionToUpdateAsync(id, cancellationToken);
+        if (session == null)
+        {
+            _toastNotification.AddErrorToastMessage("Session Can not be Edited!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        await LoadTrainersDropDownAsync(cancellationToken);
+        return View(session);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit([FromRoute] int id, UpdateSessionViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            await LoadTrainersDropDownAsync(cancellationToken);
+            return View(input);
+        }
+
+        bool updateSession = await _sessionService.UpdateSessionAsync(id, input, cancellationToken);
+
+        if (updateSession)
+            _toastNotification.AddSuccessToastMessage("Session Updated Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Session Failed To Update!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Delete Session
+
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("ID cannot be Null or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var session = await _sessionService.GetSessionByIDAsync(id, cancellationToken);
+        if (session == null)
+        {
+            _toastNotification.AddErrorToastMessage("Session is Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewBag.SessionId = id;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteConfirmed([FromForm] int id, CancellationToken cancellationToken = default)
+    {
+        var result = await _sessionService.RemoveSessionAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Session Deleted Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Session Cannot be Deleted!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private async Task LoadCategoriesDropDownAsync(CancellationToken cancellationToken = default)
+    {
+        var categories = await _sessionService.LoadCategoriesDropDownAsync(cancellationToken);
+        ViewBag.Categories = new SelectList(categories, "Id", "Name");
+    }
+
+    private async Task LoadTrainersDropDownAsync(CancellationToken cancellationToken = default)
+    {
+        var trainers = await _sessionService.LoadTrainersDropDownAsync(cancellationToken);
+        ViewBag.Trainers = new SelectList(trainers, "Id", "Name");
+    }
+
+    #endregion
 }

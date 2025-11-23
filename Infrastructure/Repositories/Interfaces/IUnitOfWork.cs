@@ -1,11 +1,8 @@
-﻿using Infrastructure.Entities;
+﻿namespace Infrastructure.Repositories.Interfaces;
 
-namespace Infrastructure.Repositories.Interfaces
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        IGenericRepository<TEnity> GetRepository<TEnity>() where TEnity : BaseEntity;
-        ISessionRepository SessionRepository { get; set; }
-        int SaveChanges();
-    }
+    IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity;
+    ISessionRepository SessionRepository { get; set; }
+    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

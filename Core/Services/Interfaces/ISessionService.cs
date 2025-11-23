@@ -1,18 +1,13 @@
-﻿using Core.ViewModels;
+﻿namespace Core.Services.Interfaces;
 
-namespace Core.Services.Interfaces
+public interface ISessionService
 {
-    public interface ISessionService
-    {
-        IEnumerable<SessionViewModel>GetAllSessions();
-
-        SessionViewModel? GetSessionByID(int id);
-        UpdateSessionViewModel? GetSessionToUpdate(int id); 
-        bool CreateSession(CreateSessionViewModel ViewModel);
-        bool UpdateSession(int id,UpdateSessionViewModel ViewModel);
-        bool RemoveSession(int id);
-        IEnumerable<TrainerSelectViewModel> LoadTrainersDropDown();
-
-        IEnumerable<CategorySelectViewModel> LoadCategoriesDropDown();
-    }
+    Task<IEnumerable<SessionViewModel>> GetAllSessionsAsync(CancellationToken cancellationToken = default);
+    Task<SessionViewModel?> GetSessionByIDAsync(int id, CancellationToken cancellationToken = default);
+    Task<UpdateSessionViewModel?> GetSessionToUpdateAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> CreateSessionAsync(CreateSessionViewModel viewModel, CancellationToken cancellationToken = default);
+    Task<bool> UpdateSessionAsync(int id, UpdateSessionViewModel viewModel, CancellationToken cancellationToken = default);
+    Task<bool> RemoveSessionAsync(int id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TrainerSelectViewModel>> LoadTrainersDropDownAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<CategorySelectViewModel>> LoadCategoriesDropDownAsync(CancellationToken cancellationToken = default);
 }

@@ -1,10 +1,9 @@
-﻿namespace Infrastructure.Entities.Enums
+﻿namespace Infrastructure.Entities.Enums;
+
+public enum Speicalites 
 {
-    public enum Speicalites 
-    {
-        GeneralFitness =1,
-        Yoga,
-        Boxing,
-        CrossFit
-    }
+    GeneralFitness =1,
+    Yoga,
+    Boxing,
+    CrossFit
 }

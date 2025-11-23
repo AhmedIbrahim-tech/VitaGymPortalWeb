@@ -1,77 +1,115 @@
-﻿using AutoMapper;
+﻿using Core.Mappers;
+using Infrastructure.Entities.Users;
 
-namespace Core.Services.Classes
+namespace Core.Services.Classes;
+
+public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _membershipRepository) : IMembershipService
 {
-	public class MembershipService : IMembershipService
-	{
-		private readonly IUnitOfWork _unitOfWork;
-		private readonly IMapper _mapper;
+    #region Create Membership
 
-        public IMembershipRepository _membershipRepository { get; set; }
+    public async Task<bool> CreateMembershipAsync(CreateMemberShipViewModel createdMemberShip, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (!await IsMemberExistsAsync(createdMemberShip.MemberId, cancellationToken) ||
+                !await IsPlanExistsAsync(createdMemberShip.PlanId, cancellationToken) ||
+                await HasActiveMemberShipAsync(createdMemberShip.MemberId, cancellationToken))
+            {
+                return false;
+            }
 
-        public MembershipService(IUnitOfWork unitOfWork, IMapper mapper,IMembershipRepository membershipRepository)
-		{
-			_unitOfWork = unitOfWork;
-			_mapper = mapper;
-            _membershipRepository = membershipRepository;
+            var memberShipToCreate = createdMemberShip.ToMemberShip();
+            var plan = await _unitOfWork.GetRepository<Plan>().GetByIDAsync(createdMemberShip.PlanId, cancellationToken);
+            memberShipToCreate.EndDate = DateTime.Now.AddDays(plan!.DurationDays);
+
+            await _unitOfWork.GetRepository<MemberShip>().AddAsync(memberShipToCreate, cancellationToken);
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
         }
-		public bool CreateMembership(CreateMemberShipViewModel CreatedMemberShip)
-		{
-			try
-			{
-				if (!IsMemberExists(CreatedMemberShip.MemberId) || !IsPlanExists(CreatedMemberShip.PlanId)
-					|| HasActiveMemberShip(CreatedMemberShip.MemberId)) return false;
-				var MemberShipToCreate = _mapper.Map<MemberShip>(CreatedMemberShip);
-				var Plan = _unitOfWork.GetRepository<Plan>().GetByID(CreatedMemberShip.PlanId);
-				MemberShipToCreate.EndDate = DateTime.Now.AddDays(Plan!.DurationDays);
-				_unitOfWork.GetRepository<MemberShip>().Add(MemberShipToCreate);
-				return _unitOfWork.SaveChanges() > 0;
-			}
-			catch
-			{
-				return false;
-			}
-		}
-		public bool DeleteMemberShip(int MemberId)
-		{
-			var Repo = _unitOfWork.GetRepository<MemberShip>();
-			var ActiveMemberships = Repo.GetAll(X => X.MemberId == MemberId && X.Status == "Active").FirstOrDefault();
-			if (ActiveMemberships is null) return false;
-			Repo.Delete(ActiveMemberships);
-			return _unitOfWork.SaveChanges() > 0;
-		}
-		public IEnumerable<MemberShipViewModel> GetAllMemberShips()
-		{
-			var MemberShips = _membershipRepository.GetAllMembershipsWithMemberAndPlan(X => X.Status == "Active");
-			if (!MemberShips.Any()) return [];
-			return _mapper.Map<IEnumerable<MemberShipViewModel>>(MemberShips);
-		}
-		public IEnumerable<PlanSelectListViewModel> GetPlansForDropDown()
-		{
-			var Plans = _unitOfWork.GetRepository<Plan>().GetAll(X => X.IsActive == true);
-			return _mapper.Map<IEnumerable<PlanSelectListViewModel>>(Plans);
-		}
-		public IEnumerable<MemberSelectListViewModel> GetMembersForDropDown()
-		{
-			var Members = _unitOfWork.GetRepository<Member>().GetAll();
-			return _mapper.Map<IEnumerable<MemberSelectListViewModel>>(Members);
-		}
-
-		#region Helper Methods 
-
-		private bool IsMemberExists(int MemberId)
-		{
-			return _unitOfWork.GetRepository<Member>().GetAll(X => X.Id == MemberId).Any();
-		}
-		private bool IsPlanExists(int PlanId)
-		{
-            return _unitOfWork.GetRepository<Plan>().GetAll(X => X.Id == PlanId).Any();
+        catch
+        {
+            return false;
         }
-		private bool HasActiveMemberShip(int memberId)
-		{
-			return _unitOfWork.GetRepository<MemberShip>().GetAll(X => X.MemberId == memberId && X.Status == "Active").Any();
-		}
+    }
 
-		#endregion
-	}
+    #endregion
+
+    #region Delete Membership
+
+    public async Task<bool> DeleteMemberShipAsync(int memberId, CancellationToken cancellationToken = default)
+    {
+        var repo = _unitOfWork.GetRepository<MemberShip>();
+        var memberships = await repo.GetAllAsync(x => x.MemberId == memberId && x.EndDate >= DateTime.Now, cancellationToken);
+        var activeMembership = memberships.FirstOrDefault();
+
+        if (activeMembership is null)
+        {
+            return false;
+        }
+
+        repo.Delete(activeMembership);
+        return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
+    }
+
+    #endregion
+
+    #region Get All Memberships
+
+    public async Task<IEnumerable<MemberShipViewModel>> GetAllMemberShipsAsync(CancellationToken cancellationToken = default)
+    {
+        var memberShips = await _membershipRepository.GetAllMembershipsWithMemberAndPlanAsync(
+            x => x.EndDate >= DateTime.Now, cancellationToken);
+        var memberShipsList = memberShips.ToList();
+
+        if (!memberShipsList.Any())
+        {
+            return [];
+        }
+
+        return memberShipsList.Select(m => m.ToMemberShipViewModel());
+    }
+
+    #endregion
+
+    #region Get Plans For Dropdown
+
+    public async Task<IEnumerable<PlanSelectListViewModel>> GetPlansForDropDownAsync(CancellationToken cancellationToken = default)
+    {
+        var plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync(x => x.IsActive == true, cancellationToken);
+        return plans.Select(p => p.ToPlanSelectListViewModel());
+    }
+
+    #endregion
+
+    #region Get Members For Dropdown
+
+    public async Task<IEnumerable<MemberSelectListViewModel>> GetMembersForDropDownAsync(CancellationToken cancellationToken = default)
+    {
+        var members = await _unitOfWork.GetRepository<Member>().GetAllAsync(null, cancellationToken);
+        return members.Select(m => m.ToMemberSelectListViewModel());
+    }
+
+    #endregion
+
+    #region Helper Methods
+
+    private async Task<bool> IsMemberExistsAsync(int memberId, CancellationToken cancellationToken = default)
+    {
+        var members = await _unitOfWork.GetRepository<Member>().GetAllAsync(x => x.Id == memberId, cancellationToken);
+        return members.Any();
+    }
+
+    private async Task<bool> IsPlanExistsAsync(int planId, CancellationToken cancellationToken = default)
+    {
+        var plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync(x => x.Id == planId, cancellationToken);
+        return plans.Any();
+    }
+
+    private async Task<bool> HasActiveMemberShipAsync(int memberId, CancellationToken cancellationToken = default)
+    {
+        var memberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
+            x => x.MemberId == memberId && x.EndDate >= DateTime.Now, cancellationToken);
+        return memberships.Any();
+    }
+
+    #endregion
 }

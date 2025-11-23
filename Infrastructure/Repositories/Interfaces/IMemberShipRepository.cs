@@ -1,9 +1,6 @@
-﻿using Infrastructure.Entities;
+﻿namespace Infrastructure.Repositories.Interfaces;
 
-namespace Infrastructure.Repositories.Interfaces
+public interface IMembershipRepository : IGenericRepository<MemberShip>
 {
-	public interface IMembershipRepository : IGenericRepository<MemberShip>
-	{
-		IEnumerable<MemberShip> GetAllMembershipsWithMemberAndPlan(Func<MemberShip, bool> predicate);
-	}
+	Task<IEnumerable<MemberShip>> GetAllMembershipsWithMemberAndPlanAsync(Expression<Func<MemberShip, bool>> predicate, CancellationToken cancellationToken = default);
 }

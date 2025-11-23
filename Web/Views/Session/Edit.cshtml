@@ -1,20 +1,23 @@
-﻿@model UpdateSessionViewModel
+﻿@using Core.ViewModels.SessionViewModels
+@model UpdateSessionViewModel
 @{
     ViewData["Title"] = "Edit Session";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div class="container mt-4">
-    <header class="mb-4">
-        <h3 class="text-primary-color">Edit Session</h3>
-        <p class="text-muted">Update session information</p>
-    </header>
-
-    <form asp-action="Edit" method="post">
+<div class="container mb-5">
+    <form asp-action="Edit" method="post" novalidate>
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body p-4">
+                <div class="card shadow-lg border rounded-4">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <i class="bi bi-pencil-square fs-1 text-primary"></i>
+                            <div>
+                                <h3 class="fw-bold text-primary mb-0">Edit Session</h3>
+                                <p class="text-muted mb-0">Update session information</p>
+                            </div>
+                        </div>
 
                         <!-- Session Information -->
                         <div class="section-header mb-3">
@@ -66,12 +69,12 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                            <a asp-action="Index" class="btn btn-outline">
-                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                        <div class="d-flex justify-content-between gap-3 border-top pt-4 mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                                <i class="bi bi-arrow-left"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-fill">
-                                <i class="bi bi-check-lg me-1"></i>Update Session
+                            <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                                <i class="bi bi-check-lg"></i> Update Session
                             </button>
                         </div>
                     </div>

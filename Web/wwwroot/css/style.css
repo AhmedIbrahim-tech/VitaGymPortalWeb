@@ -1,9 +1,16 @@
 /* ^ global style */
 
 :root {
-    --primary-color: #070093;
+    --primary-color: #E63946;
+    --primary-dark: #C1121F;
+    --primary-light: #FF6B6B;
+    --accent: #FF6B35;
+    --dark-bg: #1A1A1A;
+    --dark-secondary: #2D2D2D;
     --main-duration: 300ms;
     --black-alternative: #242424;
+    --text-primary: #1A1A1A;
+    --text-secondary: #4A4A4A;
 }
 
 button {
@@ -59,12 +66,16 @@ h4,
 h5,
 h6,
 .navbar {
-    font-family: 'Baloo Thambi 2', system-ui;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--text-primary);
 }
 
 p,
 pre {
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-secondary);
 }
 
 /* ^ Start Navbar */
@@ -156,7 +167,7 @@ section.about {
 
 /* ^ workout section */
 
-section.workout {
+    section.workout {
     margin-top: 200px !important;
     background-image: linear-gradient(var(--primary-color) 65%, #fff 65%);
     padding-bottom: 80px;
@@ -172,7 +183,7 @@ section.workout {
         section.workout .title h2 {
             font-size: 60px;
             font-weight: 700;
-            background-image: linear-gradient(#070093 45%, #ffffff);
+            background-image: linear-gradient(var(--primary-color) 45%, #ffffff);
             color: transparent;
             background-clip: text;
         }
@@ -239,49 +250,57 @@ section.workout {
 
 /* Filled Button - Default State */
 .btn-fill {
-    background-color: #070093;
-    border-color: #070093;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
     color: #fff;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
     /* Filled Button - Hover State (Switch to Outline) */
     .btn-fill:hover {
         background-color: transparent;
-        border-color: #070093;
-        color: #070093;
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
     }
 
 /* Outline Button - Default State */
 .btn-outline {
     background-color: transparent;
-    border-color: #070093;
-    color: #070093;
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
     /* Outline Button - Hover State (Switch to Fill) */
     .btn-outline:hover {
-        background-color: #070093;
-        border-color: #070093;
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
         color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
     }
 
     /* Focus States for Accessibility */
     .btn-fill:focus,
     .btn-outline:focus {
-        outline: 3px solid rgba(7, 0, 147, 0.3);
+        outline: 3px solid rgba(230, 57, 70, 0.3);
         outline-offset: 2px;
     }
 
 /* Active/Pressed States */
 .btn-fill:active {
-    background-color: #050070;
-    border-color: #050070;
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
     transform: scale(0.98);
 }
 
 .btn-outline:active {
-    background-color: #050070;
-    border-color: #050070;
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
     color: #fff;
     transform: scale(0.98);
 }
@@ -489,7 +508,7 @@ footer .footer-content .location p {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: rgba(7, 0, 147, 0.1);
+    background-color: rgba(230, 57, 70, 0.1);
     border-radius: 10px;
 }
 
@@ -516,7 +535,7 @@ footer .footer-content .location p {
 }
 
 .bg-primary {
-    background-color: #070093 !important;
+    background-color: var(--primary-color) !important;
 }
 
 .icon-box {
@@ -562,12 +581,16 @@ footer .footer-content .location p {
     transition: all 0.3s ease;
     border-radius: 30px;
     padding: 10px 20px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
     .get-started:hover {
         background-color: transparent;
         color: var(--primary-color);
         border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
         -webkit-background-clip: border-box; /* cancel any text-clip */
         background-clip: border-box; /* ensure normal coloring */
         -webkit-text-fill-color: var(--primary-color); /* fix text rendering */
@@ -578,6 +601,8 @@ footer .footer-content .location p {
     border: 2px solid var(--primary-color);
     border-radius: 30px;
     transition: all 0.3s ease;
+    font-weight: 600;
+    letter-spacing: 0.5px;
     -webkit-text-fill-color: var(--primary-color); /* fix Chrome text rendering */
 }
 
@@ -585,5 +610,7 @@ footer .footer-content .location p {
         background-color: var(--primary-color);
         color: #fff;
         border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
         -webkit-text-fill-color: #fff; /* ensures text stays visible on hover */
     }

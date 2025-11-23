@@ -1,117 +1,114 @@
-﻿@model MemberViewModel
+﻿@using Core.ViewModels.MemberViewModels
+@model MemberViewModel
 @{
-	ViewData["Title"] = "MemberDetails";
+	ViewData["Title"] = "Member Details";
 }
 
-@* Assuming the view is strongly typed to a MemberDetailsViewModel or similar *@
-@* e.g., @model YourAppName.ViewModels.MemberDetailsViewModel *@
+<!-- Member Details -->
+<div class="container mb-5">
+    <div class="card shadow-lg border border-primary rounded-5 overflow-hidden col-lg-8 m-auto">
+        <div class="card-body p-4 p-md-5">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card card-details border-0 p-2 shadow">
-
-                @* Profile Header (Photo and Name) *@
-                <div class="card-body text-center">
-
-                    <div class="text-center mt-3">
-                    @if (!string.IsNullOrEmpty(Model.Photo))
-                        {
-                              <img src="~/images/members/@Model.Photo"
-                             alt="@Model.Name"
-                             class="rounded-circle"
-                             style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff; margin-bottom: 10px;" />
-                        }
-                        else
-                        {
-                            <img src="~/images/@Model.Photo"
-                                 alt="Default Avatar"
-                                 class="rounded-circle"
-                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #fff; margin-bottom: 10px;" />
-                        }
-                    </div>
-
-                    @* Name and Plan *@
-                    <h2 class="mb-1 text-primary-color">@Model.Name</h2>
-                    <h4 class="mb-2 pb-1 border-bottom d-block">
-                        @(Model.PlanName ?? "No Active Plans")
-                    </h4>
+            <!-- Header -->
+            <div class="row g-4 align-items-center border-bottom pb-4 mb-4">
+                <div class="col-12 col-md-3 text-center">
+					@if (Model.Photo != null)
+					{
+						<img src="~/images/members/@Model.Photo"
+							 alt="Member photo"
+							 class="img-fluid rounded-circle border border-3 border-primary shadow-sm"
+							 style="width: 150px; height: 150px; object-fit: cover;">
+					}
+					else
+					{
+						<img src="~/images/user.png"
+							 alt="Member photo"
+							 class="img-fluid rounded-circle border border-3 border-primary shadow-sm"
+							 style="width: 150px; height: 150px; object-fit: cover;">
+					}
+				</div>
+                <div class="col-12 col-md-9 text-center text-md-start">
+                    <h3 class="fw-bold text-primary mb-1">@Model.Name</h3>
+					<p class="mb-0">Plan: <span class="fw-semibold text-muted">@(Model.PlanName ?? "No Active Plans")</span></p>
                 </div>
-
-                @* Details Section *@
-                <div class="card-body text-center">
-                    <div class="mt-4 text-start">
-                        <div class="row g-3">
-
-                            @* 1. Email *@
-                            <div class="col-12">
-                                <div class="p-3 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">Email</small>
-                                    <strong>@Model.Email</strong>
-                                </div>
-                            </div>
-
-                            @* 2. Phone *@
-                            <div class="col-12">
-                                <div class="p-3 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">Phone</small>
-                                    <strong>@Model.Phone</strong>
-                                </div>
-                            </div>
-
-                            @* 3. Gender (col-6) *@
-                            <div class="col-6">
-                                <div class="p-3 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">Gender</small>
-                                    <strong>@Model.Gender</strong>
-                                </div>
-                            </div>
-
-                            @* 4. Date of Birth (col-6) *@
-                            <div class="col-6">
-                                <div class="p-3 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">Date of Birth</small>
-                                    <strong>@Model.DateOfBirth</strong>
-                                </div>
-                            </div>
-
-                            @* 5. Membership Details (Conditional) *@
-                            @if (Model.PlanName != null)
-                            {
-                                @* Membership Start Date (col-6) *@
-                                <div class="col-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block mb-1">Membership Start Date</small>
-                                        <strong>@Model.MembershipStartDate</strong>
-                                    </div>
-                                </div>
-
-                                @* Membership End Date (col-6) *@
-                                <div class="col-6">
-                                    <div class="p-3 bg-light rounded">
-                                        <small class="text-muted d-block mb-1">Membership End Date</small>
-                                        <strong>@Model.MembershipEndDate</strong>
-                                    </div>
-                                </div>
-                            }
-
-                            @* 6. Address (col-12) *@
-                            <div class="col-12">
-                                <div class="p-3 bg-light rounded">
-                                    <small class="text-muted d-block mb-1">Address</small>
-                                    <strong>@Model.Address</strong>
-                                </div>
-                            </div>
-
-                        </div> 
-                    </div> 
-                </div> 
-            </div> 
-
-            <div class="d-flex justify-content-between gap-2 px-3 pb-3">
-                <a asp-controller="Member" asp-action="Index" class="btn btn-fill flex-fill">Back to List</a>
             </div>
 
-        </div> 
-    </div> 
-</div> 
+            <!-- Basic Info Section -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-secondary border-start border-4 border-primary ps-2 mb-3">
+                    <i class="bi bi-person-circle me-2"></i>Basic Information
+                </h5>
+                <div class="row gy-3">
+                    <div class="col-6 col-md-4">
+                        <p class="mb-1 fw-semibold text-secondary">Gender</p>
+                        <p class="mb-0">@Model.Gender</p>
+                    </div>
+                    <div class="col-6 col-md-8">
+                        <p class="mb-1 fw-semibold text-secondary">Birth Date</p>
+                        <p class="mb-0">@Model.DateOfBirth</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Info Section -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-secondary border-start border-4 border-success ps-2 mb-3">
+                    <i class="bi bi-envelope-paper me-2"></i>Contact Information
+                </h5>
+                <div class="row gy-3">
+                    <div class="col-12 col-md-4">
+                        <p class="mb-1 fw-semibold text-secondary">Email</p>
+                        <p class="mb-0">@Model.Email</p>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <p class="mb-1 fw-semibold text-secondary">Phone</p>
+                        <p class="mb-0">@Model.Phone</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Membership Info Section -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-secondary border-start border-4 border-info ps-2 mb-3">
+                    <i class="bi bi-calendar-check me-2"></i>Membership Details
+                </h5>
+                <div class="row gy-3">
+                    <div class="col-6 col-md-4">
+                        <p class="mb-1 fw-semibold text-secondary">Start Date</p>
+                        <p class="mb-0">@Model.MembershipStartDate</p>
+                    </div>
+                    <div class="col-6 col-md-6">
+                        <p class="mb-1 fw-semibold text-secondary">End Date</p>
+                        <p class="mb-0">@Model.MembershipEndDate</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Info Section -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-secondary border-start border-4 border-warning ps-2 mb-3">
+                    <i class="bi bi-geo-alt me-2"></i>Address
+                </h5>
+                <div class="row gy-3">
+                    <div class="col-6 col-md-4">
+                        <p class="mb-0">@Model.Address</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap justify-content-end gap-3 pt-3 border-top mt-4">
+				<a class="btn btn-primary d-flex align-items-center gap-2" asp-action="MemberEdit" asp-route-Id="@Model.Id">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+				<a class="btn btn-danger d-flex align-items-center gap-2" asp-action="Delete" asp-route-Id="@Model.Id">
+                    <i class="bi bi-trash"></i> Delete
+                </a>
+                <a class="btn btn-outline-secondary d-flex align-items-center gap-2" asp-action="Index">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>

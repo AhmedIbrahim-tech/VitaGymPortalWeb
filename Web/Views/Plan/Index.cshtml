@@ -1,42 +1,28 @@
-﻿@model IEnumerable<PlanViewModel>
+﻿@using Core.ViewModels.PlanViewModels
+@model IEnumerable<PlanViewModel>
 @{
-    ViewData["Title"] = "Plans";
-   
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div id="Alert" class="alert alert-success alert-dismissible fade show">
-        <i class="bi bi-check-circle-fill me-2"></i>
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-else if (TempData["ErrorMessage"] != null)
-{
-    <div id="Alert" class="alert alert-danger alert-dismissible fade show">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
+<partial name="_AlertMessages" />
 
-<div class="container">
-    <header class="d-flex justify-content-between mt-5 mb-4 align-items-center">
-        <div>
-            <h2 class="text-primary-color mb-0">Membership Plans</h2>
-            <p class="text-muted">Manage your gym membership packages</p>
-        </div>
-    </header>
+<div class="container-fluid">
+    <div class="mb-4">
+        <h2 class="text-primary fw-bold mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-award fs-1"></i>
+            <span>Membership Plans</span>
+        </h2>
+        <p class="text-muted">Manage your gym membership packages</p>
+    </div>
 
     @if (Model != null && Model.Any())
     {
         <div class="row g-4">
             @foreach (var plan in Model)
             {
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0 plan-card">
-                        <div class="card-header text-white text-center py-4 @(plan.IsActive ? "bg-primary-color" : "bg-secondary")">
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card h-100 shadow-sm border rounded-4 plan-card">
+                        <div class="card-header text-white text-center py-4 rounded-top-4 @(plan.IsActive ? "bg-primary" : "bg-secondary")">
                             <h4 class="mb-0">@plan.Name</h4>
                         </div>
                         <div class="card-body d-flex flex-column">
@@ -46,10 +32,20 @@ else if (TempData["ErrorMessage"] != null)
                             </div>
 
                             <div class="mb-3">
-                                <p class="text-muted mb-2">
-                                    <i class="bi bi-calendar-check text-primary-color me-2"></i>
-                                    <strong>Duration:</strong> @plan.DurationDays
-                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="text-muted mb-2">
+                                        <i class="bi bi-calendar-check text-primary-color me-2"></i>
+                                        <strong>Duration:</strong> @plan.DurationDays
+                                    </p>
+                                    @if (plan.IsActive)
+                                    {
+                                        <span class="badge text-bg-success">active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge text-bg-danger">Inactive</span>
+                                    }
+                                </div>
                                 <p class="text-muted mb-3">
                                     <i class="bi bi-file-text text-primary-color me-2"></i>
                                     <strong>Description:</strong>
@@ -59,15 +55,15 @@ else if (TempData["ErrorMessage"] != null)
 
                             <div class="mt-auto">
                                 <div class="d-grid gap-2">
-                                    <a asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline btn-sm">
+                                    <a asp-action="Details" asp-route-id="@plan.Id" class="btn btn-outline-primary btn-sm">
                                         <i class="bi bi-eye me-1"></i>View Details
                                     </a>
                                     <div class="d-flex gap-2">
-                                        <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline btn-sm flex-fill">
+                                        <a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-outline-warning btn-sm flex-fill">
                                             <i class="bi bi-pencil me-1"></i>Edit
                                         </a>
                                         <form asp-action="Activate" asp-route-id="@plan.Id" method="post" class="flex-fill">
-                                            <button type="submit" class="btn btn-outline btn-sm w-100 @(plan.IsActive ? "text-danger" : "text-success")">
+                                            <button type="submit" class="btn btn-sm w-100 @(plan.IsActive ? "btn-outline-danger" : "btn-outline-success")">
                                                 @if (plan.IsActive)
                                                 {
                                                     <i class="bi bi-x-circle me-1"> Deactivate </i>
@@ -91,12 +87,6 @@ else if (TempData["ErrorMessage"] != null)
     }
     else
     {
-        <div class="text-center py-5">
-            <i class="bi bi-inbox display-1 text-muted"></i>
-            <h4 class="mt-3 text-muted">No Plans Available</h4>
-        </div>
+        <partial name="_EmptyState" model="@((string)null)" />
     }
 </div>
-@section Scripts {
-    <partial name="_AlertBoxScript" />
-}

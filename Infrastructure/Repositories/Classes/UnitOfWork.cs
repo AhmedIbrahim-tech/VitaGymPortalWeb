@@ -1,33 +1,24 @@
-﻿namespace Infrastructure.Repositories.Classes
+﻿namespace Infrastructure.Repositories.Classes;
+
+public class UnitOfWork(ApplicationDbContext _context) : IUnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    private readonly Dictionary<string, object> _repositories = [];
+    public ISessionRepository SessionRepository { get; set; } = new SessionRepository(_context);
+
+    public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : BaseEntity
     {
-        private readonly GymDbContext _context;
-        private readonly Dictionary<string, object> _repositories = [];
-
-        public UnitOfWork(GymDbContext context)
+        string typeName = typeof(TEntity).Name;
+        if (_repositories.TryGetValue(typeName, out object? repository))
         {
-            _context = context;
+            return (IGenericRepository<TEntity>)repository;
         }
+        var newRepository = new GenericRepository<TEntity>(_context);
+        _repositories.Add(typeName, newRepository);
+        return newRepository;
+    }
 
-        public ISessionRepository SessionRepository { get ; set ; }
-        public IBookingRepository BookingRepository { get ; set ; }
-        public IMembershipRepository MembershipRepository { get ; set ; }
-
-        public IGenericRepository<TEnity> GetRepository<TEnity>() where TEnity : BaseEntity
-        {
-            string typeName = typeof(TEnity).Name;
-            if(_repositories.TryGetValue(typeName, out object? repository))
-            {
-                return (IGenericRepository<TEnity>)repository;
-            }
-            var newRepository = new GenericRepository<TEnity>(_context);
-            _repositories.Add(typeName, newRepository);
-            return newRepository;
-
-        }
-
-        public int SaveChanges() => _context.SaveChanges();
-        
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.SaveChangesAsync(cancellationToken);
     }
 }

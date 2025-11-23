@@ -1,15 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Core.ViewModels.AccountViewModels;
 
-namespace Core.ViewModels
+public class LoginViewModel
 {
-	public class LoginViewModel
-	{
-		[Required(ErrorMessage = "Email Is Required")]
-		public string Email { get; set; } = null!;
-
-		[Required(ErrorMessage = "Password Is Required")]
-		[DataType(DataType.Password)]
-		public string Password { get; set; } = null!;
-		public bool RememberMe { get; set; }
-	}
+	public string Email { get; set; } = null!;
+	public string Password { get; set; } = null!;
+	public bool RememberMe { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Entities;
+﻿using Infrastructure.Entities.Users;
 
 namespace Infrastructure.Data.Configurations
 {

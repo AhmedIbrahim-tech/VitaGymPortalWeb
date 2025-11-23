@@ -1,14 +1,10 @@
-﻿using Core.ViewModels;
+﻿namespace Core.Services.Interfaces;
 
-namespace Core.Services.Interfaces
+public interface IMembershipService
 {
-	public interface IMembershipService
-	{
-		IEnumerable<MemberShipViewModel> GetAllMemberShips();
-		bool CreateMembership(CreateMemberShipViewModel CreatedMemberShip);
-		bool DeleteMemberShip(int MemberId);
-		IEnumerable<PlanSelectListViewModel> GetPlansForDropDown();
-		IEnumerable<MemberSelectListViewModel> GetMembersForDropDown();
-
-	}
+	Task<IEnumerable<MemberShipViewModel>> GetAllMemberShipsAsync(CancellationToken cancellationToken = default);
+	Task<bool> CreateMembershipAsync(CreateMemberShipViewModel createdMemberShip, CancellationToken cancellationToken = default);
+	Task<bool> DeleteMemberShipAsync(int memberId, CancellationToken cancellationToken = default);
+	Task<IEnumerable<PlanSelectListViewModel>> GetPlansForDropDownAsync(CancellationToken cancellationToken = default);
+	Task<IEnumerable<MemberSelectListViewModel>> GetMembersForDropDownAsync(CancellationToken cancellationToken = default);
 }

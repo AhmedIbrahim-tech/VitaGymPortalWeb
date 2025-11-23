@@ -1,14 +1,10 @@
-﻿using Core.ViewModels;
+﻿namespace Core.Services.Interfaces;
 
-namespace Core.Services.Interfaces
+public interface IPlanService
 {
-    public interface IPlanService
-    {
-         bool UpdatePlan(int planID, UpdatePlanViewModel viewModel);
-         UpdatePlanViewModel? GetPlanToUpdate(int planID);
-         IEnumerable<PlanViewModel> GetAllPlans();
-         PlanViewModel? GetPlanById(int planID);
-         bool Activate(int planID);
-
-    }
+    Task<bool> UpdatePlanAsync(int planID, UpdatePlanViewModel viewModel, CancellationToken cancellationToken = default);
+    Task<UpdatePlanViewModel?> GetPlanToUpdateAsync(int planID, CancellationToken cancellationToken = default);
+    Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken cancellationToken = default);
+    Task<PlanViewModel?> GetPlanByIdAsync(int planID, CancellationToken cancellationToken = default);
+    Task<bool> ActivateAsync(int planID, CancellationToken cancellationToken = default);
 }

@@ -1,33 +1,28 @@
-﻿namespace Infrastructure.Repositories.Classes
+﻿namespace Infrastructure.Repositories.Classes;
+
+public class SessionRepository(ApplicationDbContext _context) : GenericRepository<Session>(_context), ISessionRepository
 {
-    public class SessionRepository : GenericRepository<Session>,ISessionRepository
+    public async Task<IEnumerable<Session>> GetAllSessionsWithTrainerAndCategoryAsync(CancellationToken cancellationToken = default)
     {
-        private readonly GymDbContext _context;
-        public SessionRepository(GymDbContext context) : base(context)
-        {
-            _context = context;
-        }
-        public IEnumerable<Session> GetAllSessionsWithTrainerAndCategory()
-        {
-           return _context.Sessions
-                .Include(s => s.Trainer)
-                .Include(s => s.Category)
-                .ToList();
-        }
+        return await _context.Sessions
+            .Include(s => s.Trainer)
+            .Include(s => s.Category)
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
 
-        public int GetCountOfBookedSlots(int sessionId)
-        {
-            return _context.Bookings
-                .Count(b => b.SessionId == sessionId);
-        }
+    public async Task<Session?> GetSessionWithTrainerAndCategoryAsync(int sessionId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Sessions
+            .Include(s => s.Trainer)
+            .Include(s => s.Category)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == sessionId, cancellationToken);
+    }
 
-        public Session GetSessionWithTrainerAndCategory(int sessionID)
-        {
-            return _context.Sessions
-                .Include(s => s.Trainer)
-                .Include(s => s.Category)
-                .FirstOrDefault(x =>x.Id ==sessionID);
-        }
-
+    public async Task<int> GetCountOfBookedSlotsAsync(int sessionId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Bookings
+            .CountAsync(b => b.SessionId == sessionId, cancellationToken);
     }
 }

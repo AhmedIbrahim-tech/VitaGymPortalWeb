@@ -1,14 +1,11 @@
-﻿using Core.ViewModels;
+﻿namespace Core.Services.Interfaces;
 
-namespace Core.Services.Interfaces
+public interface ITrainerService
 {
-    public interface ITrainerService
-    {
-        public bool CreateTrainer(CreateTrainerViewModel trainerViewModel);
-        public bool UpdateTrainer(int id, TrainerToUpdateViewModel trainerViewModel);
-        public bool RemoveTrainer(int id);
-        public IEnumerable<TrainerViewModel> GetAllTrainers();
-        public TrainerViewModel? GetTrainerDetails(int id);
-        public TrainerToUpdateViewModel? GetTrainerToUpdate(int id);
-    }
+    Task<bool> CreateTrainerAsync(CreateTrainerViewModel trainerViewModel, CancellationToken cancellationToken = default);
+    Task<bool> UpdateTrainerAsync(int id, TrainerToUpdateViewModel trainerViewModel, CancellationToken cancellationToken = default);
+    Task<bool> RemoveTrainerAsync(int id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TrainerViewModel>> GetAllTrainersAsync(CancellationToken cancellationToken = default);
+    Task<TrainerViewModel?> GetTrainerDetailsAsync(int id, CancellationToken cancellationToken = default);
+    Task<TrainerToUpdateViewModel?> GetTrainerToUpdateAsync(int id, CancellationToken cancellationToken = default);
 }

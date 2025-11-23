@@ -1,18 +1,17 @@
-﻿namespace Core.ViewModels
+﻿namespace Core.ViewModels.MembershipViewModels;
+
+public class MemberShipForMemberViewModel
 {
-	public class MemberShipForMemberViewModel
+	public string MemberName { get; set; } = null!;
+	public string PlanName { get; set; } = null!;
+	public DateTime StartDate { get; set; }
+	public DateTime EndDate { get; set; }
+	public string? Status { get; set; }
+	public int? RemainingDays
 	{
-		public string MemberName { get; set; } = null!;
-		public string PlanName { get; set; } = null!;
-		public DateTime StartDate { get; set; }
-		public DateTime EndDate { get; set; }
-		public string? Status { get; set; }
-		public int? RemainingDays
+		get
 		{
-			get
-			{
-				return (EndDate - DateTime.Now).Days;
-			}
+			return (EndDate - DateTime.Now).Days;
 		}
 	}
 }

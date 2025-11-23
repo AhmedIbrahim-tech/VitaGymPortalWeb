@@ -1,97 +1,88 @@
-﻿@model TrainerToUpdateViewModel;
+﻿@using Core.ViewModels.TrainerViewModels
+@model TrainerToUpdateViewModel
 @{
-    ViewData["Title"] = "Trainer Details";
+	ViewData["Title"] = "Trainer Details";
 }
 
-<div class="container mt-4">
-    <header class="mb-4">
-        <h3 class="text-primary-color">Edit Trainer</h3>
-        <p class="text-muted">Update trainer information</p>
-    </header>
-
+<div class="container mb-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-4">
-                    <div class="mb-4 pb-3 border-bottom">
-                        <small class="text-muted d-block mb-1">Editing Profile For</small>
-                        <h4 class="mb-0 text-black">@Model.Name</h4>
+            <div class="card shadow-lg border-primary rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-primary mb-2">Edit Trainer</h3>
+                        <p class="text-muted mb-0">Editing profile for <strong>@Model.Name</strong></p>
                     </div>
-                    <form asp-controller="Trainer" asp-action="TrainerEdit" method="post">
-                        <input asp-for="Name" hidden readonly />
+                    <form asp-controller="Trainer" asp-action="TrainerEdit" method="post" novalidate>
+                        <input asp-for="Name" type="hidden" />
 
                         <!-- Personal Information -->
-                        <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Personal Information</h5>
-                            <hr class="mt-2">
-                        </div>
-                        <div class="row g-3 mb-4">
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-secondary border-start border-4 border-primary ps-2 mb-3">
+                                <i class="bi bi-person-circle me-2"></i>Personal Information
+                            </h5>
+                            <div class="row g-3">
 
 
                             <div class="col-md-6">
                                 <label asp-for="Email" class="form-label">Email Address</label>
                                 <input asp-for="Email" name="Email" type="text" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
                             </div>
 
                             <div class="col-md-6">
                                 <label asp-for="Phone" class="form-label">Phone</label>
                                 <input asp-for="Phone" name="Phone" type="text" class="form-control" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="BuildingNumber" class="form-label">BuildingNumber</label>
                                 <input asp-for="BuildingNumber" name="BuildingNumber" type="text" class="form-control" />
+                                <span asp-validation-for="BuildingNumber" class="text-danger"></span>
                             </div>
                             <div class="col-md-6">
                                 <label asp-for="Street" class="form-label">Street</label>
                                 <input asp-for="Street" name="Street" type="text" class="form-control" />
+                                <span asp-validation-for="Street" class="text-danger"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="City" class="form-label">City</label>
-                                <input asp-for="City" name="City" type="text" class="form-control" />
+                                <div class="col-md-6">
+                                    <label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                    <input asp-for="City" class="form-control" />
+                                    <span asp-validation-for="City" class="text-danger"></span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Professional Information -->
-                        <div class="section-header mb-3">
-                            <h5 class="text-primary fw-bold">Professional Information</h5>
-                            <hr class="mt-2">
-                        </div>
-                        <div class="row g-3">
-
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">
-                                    Specializations <span class="text-danger">*</span>
-                                </label>
-
-                                <div class="form-check">
-                                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization"
-                                           value="GeneralFitness" />
-                                    <label asp-for="Specialization" class="form-check-label">GeneralFitness</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization"
-                                           value="Yoga" />
-                                    <label asp-for="Specialization" class="form-check-label">Yoga</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization"
-                                           value="Boxing" />
-                                    <label asp-for="Specialization" class="form-check-label">Boxing</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization"
-                                           value="CrossFit" />
-                                    <label asp-for="Specialization" class="form-check-label">CrossFit</label>
+                        <div class="mb-5">
+                            <h5 class="fw-bold text-secondary border-start border-4 border-info ps-2 mb-3">
+                                <i class="bi bi-award me-2"></i>Professional Information
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">
+                                        Specialization <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var speciality in Enum.GetValues(typeof(Speicalites)))
+                                        {
+                                            <div class="form-check">
+                                                <input asp-for="Specialization" type="radio" value="@speciality" id="@speciality" class="form-check-input" />
+                                                <label class="form-check-label" for="@speciality">@speciality</label>
+                                            </div>
+                                        }
+                                    </div>
+                                    <span asp-validation-for="Specialization" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4 pt-3 border-top">
-                            <a asp-action="Index" class="btn btn-outline">
-                                <i class="bi bi-arrow-left me-1"></i>Cancel
+                        <div class="d-flex justify-content-between gap-3 border-top pt-4 mt-4">
+                            <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                                <i class="bi bi-arrow-left"></i> Cancel
                             </a>
-                            <button type="submit" class="btn btn-fill">
-                                <i class="bi bi-check-lg me-1"></i>Update Trainer
+                            <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                                <i class="bi bi-check-lg"></i> Update Trainer
                             </button>
                         </div>
                     </form>
@@ -101,7 +92,6 @@
     </div>
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

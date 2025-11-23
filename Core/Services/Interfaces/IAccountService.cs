@@ -1,7 +1,8 @@
-﻿namespace Core.Services.Interfaces
+﻿using Infrastructure.Entities.Users;
+
+namespace Core.Services.Interfaces;
+
+public interface IAccountService
 {
-    public interface IAccountService
-    {
-        ApplicationUser? ValidiateUser(LoginViewModel input); 
-    }
+    Task<ApplicationUser?> ValidateUserAsync(LoginViewModel input, CancellationToken cancellationToken = default);
 }

@@ -1,75 +1,99 @@
-﻿
+﻿namespace Web.Controllers;
 
-namespace Web.Controllers
+[Authorize]
+public class BookingController(IBookingService _bookingService, IToastNotification _toastNotification) : Controller
 {
-	[Authorize]
-	public class BookingController : Controller
-	{
-		private readonly IBookingService _bookingService;
+    #region Get Bookings
 
-		public BookingController(IBookingService bookingService)
-		{
-			_bookingService = bookingService;
-		}
-		public IActionResult Index()
-		{
-			var Bookings = _bookingService.GetAllSessions();
-			return View(Bookings);
-		}
-		public ActionResult GetMembersForUpcomingSession(int id)
-		{
-			var Members = _bookingService.GetMembersForUpcomingBySessionId(id);
-			return View(Members);
-		}
-		public ActionResult Create(int id)
-		{
-			var members = _bookingService.GetMembersForDropDown(id);
-			ViewBag.members = new SelectList(members, "Id", "Name");
-			return View();
-		}
-		[HttpPost]
-		public ActionResult Create(CreateBookingViewModel createdBooking)
-		{
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+    {
+        var bookings = await _bookingService.GetAllSessionsAsync(cancellationToken);
 
-			var result = _bookingService.CreateNewBooking(createdBooking);
-			if (result)
-			{
-				TempData["SuccessMessage"] = "Booking Created successfully!";
-			}
-			else
-			{
-				TempData["ErrorMessage"] = "Failed to Create Booking,Member does not have Active Plan.";
-			}
+        ViewData["Title"] = "Bookings";
 
-			return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+        if (bookings == null || !bookings.Any())
+        {
+            ViewData["EmptyIcon"] = "calendar-x";
+            ViewData["EmptyTitle"] = "No Sessions Available";
+            ViewData["EmptyMessage"] = "Create training session first to get started";
+        }
 
-		}
-		[HttpPost]
-		public ActionResult Cancel(int MemberId, int SessionId)
-		{
-			var result = _bookingService.CancelBooking(MemberId, SessionId);
-			if (result)
-			{
-				TempData["SuccessMessage"] = "Booking cancelled successfully!";
-			}
-			else
-			{
-				TempData["ErrorMessage"] = "Failed to cancel Booking.";
-			}
+        return View(bookings);
+    }
 
-			return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = SessionId });
-		}
-		public ActionResult GetMembersForOngoingSessions(int id)
-		{
-			var Members = _bookingService.GetMembersForOngoingBySessionId(id);
-			return View(Members);
-		}
-		[HttpPost]
-		public ActionResult Attended(int MemberId, int SessionId)
-		{
-			var result = _bookingService.MemberAttended(MemberId, SessionId);
-			return RedirectToAction(nameof(GetMembersForOngoingSessions), new { id = SessionId });
+    #endregion
 
-		}
-	}
+    #region Get Members For Session
+
+    public async Task<IActionResult> GetMembersForUpcomingSession(int id, CancellationToken cancellationToken = default)
+    {
+        var members = await _bookingService.GetMembersForUpcomingBySessionIdAsync(id, cancellationToken);
+        return View(members);
+    }
+
+    public async Task<IActionResult> GetMembersForOngoingSessions(int id, CancellationToken cancellationToken = default)
+    {
+        var members = await _bookingService.GetMembersForOngoingBySessionIdAsync(id, cancellationToken);
+        return View(members);
+    }
+
+    #endregion
+
+    #region Create Booking
+
+    public async Task<IActionResult> Create(int id, CancellationToken cancellationToken = default)
+    {
+        var members = await _bookingService.GetMembersForDropDownAsync(id, cancellationToken);
+        ViewBag.members = new SelectList(members, "Id", "Name");
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(CreateBookingViewModel createdBooking, CancellationToken cancellationToken = default)
+    {
+        var result = await _bookingService.CreateNewBookingAsync(createdBooking, cancellationToken);
+        if (result)
+        {
+            _toastNotification.AddSuccessToastMessage("Booking Created successfully!");
+        }
+        else
+        {
+            _toastNotification.AddErrorToastMessage("Failed to Create Booking, Member does not have Active Plan.");
+        }
+
+        return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = createdBooking.SessionId });
+    }
+
+    #endregion
+
+    #region Cancel Booking
+
+    [HttpPost]
+    public async Task<IActionResult> Cancel(int memberId, int sessionId, CancellationToken cancellationToken = default)
+    {
+        var result = await _bookingService.CancelBookingAsync(memberId, sessionId, cancellationToken);
+        if (result)
+        {
+            _toastNotification.AddSuccessToastMessage("Booking cancelled successfully!");
+        }
+        else
+        {
+            _toastNotification.AddErrorToastMessage("Failed to cancel Booking.");
+        }
+
+        return RedirectToAction(nameof(GetMembersForUpcomingSession), new { id = sessionId });
+    }
+
+    #endregion
+
+    #region Mark Attendance
+
+    [HttpPost]
+    public async Task<IActionResult> Attended(int memberId, int sessionId, CancellationToken cancellationToken = default)
+    {
+        await _bookingService.MemberAttendedAsync(memberId, sessionId, cancellationToken);
+        return RedirectToAction(nameof(GetMembersForOngoingSessions), new { id = sessionId });
+    }
+
+    #endregion
 }

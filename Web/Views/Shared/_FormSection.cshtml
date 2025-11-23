@@ -1,0 +1,31 @@
+@* 
+    Reusable Form Section Partial
+    Usage: <partial name="_FormSection" model="Section Title" />
+    ViewData options:
+    - SectionIcon: Bootstrap icon name (default: "file-text")
+    - SectionColor: Border color (primary, success, danger, warning, info) (default: "primary")
+*@
+@model string
+
+@{
+    var title = Model ?? "Section";
+    var icon = ViewData["SectionIcon"] as string ?? "file-text";
+    var color = ViewData["SectionColor"] as string ?? "primary";
+    var colorMap = new Dictionary<string, string>
+    {
+        { "primary", "border-primary" },
+        { "success", "border-success" },
+        { "danger", "border-danger" },
+        { "warning", "border-warning" },
+        { "info", "border-info" }
+    };
+    var borderColor = colorMap.ContainsKey(color.ToLower()) ? colorMap[color.ToLower()] : "border-primary";
+}
+
+<div class="mb-5">
+    <h5 class="fw-bold text-secondary border-start border-4 @borderColor ps-3 mb-3 d-flex align-items-center gap-2">
+        <i class="bi bi-@(icon)"></i>
+        <span>@title</span>
+    </h5>
+</div>
+

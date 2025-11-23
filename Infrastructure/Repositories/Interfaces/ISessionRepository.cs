@@ -1,13 +1,8 @@
-﻿using Infrastructure.Entities;
+﻿namespace Infrastructure.Repositories.Interfaces;
 
-namespace Infrastructure.Repositories.Interfaces
+public interface ISessionRepository : IGenericRepository<Session>
 {
-    public interface ISessionRepository 
-    {
-        IEnumerable<Session> GetAllSessionsWithTrainerAndCategory();
-
-        Session GetSessionWithTrainerAndCategory(int sessionID);
-
-        int GetCountOfBookedSlots(int sessionId);
-    }
+    Task<IEnumerable<Session>> GetAllSessionsWithTrainerAndCategoryAsync(CancellationToken cancellationToken = default);
+    Task<Session?> GetSessionWithTrainerAndCategoryAsync(int sessionId, CancellationToken cancellationToken = default);
+    Task<int> GetCountOfBookedSlotsAsync(int sessionId, CancellationToken cancellationToken = default);
 }

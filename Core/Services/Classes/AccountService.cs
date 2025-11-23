@@ -1,21 +1,22 @@
-﻿namespace Core.Services.Classes
+﻿using Infrastructure.Entities.Users;
+
+namespace Core.Services.Classes;
+
+public class AccountService(UserManager<ApplicationUser> _userManager) : IAccountService
 {
-    public class AccountService : IAccountService
+    #region Validate User
+
+    public async Task<ApplicationUser?> ValidateUserAsync(LoginViewModel input, CancellationToken cancellationToken = default)
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-
-        public AccountService(UserManager<ApplicationUser> userManager)
+        var user = await _userManager.FindByEmailAsync(input.Email);
+        if (user == null)
         {
-            _userManager = userManager;
+            return null;
         }
-        public ApplicationUser? ValidiateUser(LoginViewModel input)
-        {
-            var user = _userManager.FindByEmailAsync(input.Email).Result;
-            if (user == null) return null;
 
-            var IsPasswordVaild = _userManager.CheckPasswordAsync(user, input.Password).Result;
-            return IsPasswordVaild ? user : null;
-
-        }
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, input.Password);
+        return isPasswordValid ? user : null;
     }
+
+    #endregion
 }

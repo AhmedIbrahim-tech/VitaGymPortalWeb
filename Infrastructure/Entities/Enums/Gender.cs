@@ -1,8 +1,7 @@
-﻿namespace Infrastructure.Entities.Enums
+﻿namespace Infrastructure.Entities.Enums;
+
+public enum Gender
 {
-    public enum Gender
-    {
-        Male =1,
-        Female
-    }
+    Male =1,
+    Female
 }

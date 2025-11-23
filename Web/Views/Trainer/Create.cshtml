@@ -1,60 +1,68 @@
-﻿@model CreateTrainerViewModel
+﻿@using Core.ViewModels.TrainerViewModels
+@model CreateTrainerViewModel
 @{
-    ViewData["Title"] = "Create Trainer";
+	ViewData["Title"] = "Create Trainer";
 }
 
-<div class="container mt-4">
-    <header class="mb-4">
-        <h3 class="text-primary-color">Add New Trainer</h3>
-    </header>
+<div class="container mb-5">
+    <div class="card shadow-lg border rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <i class="bi bi-person-plus fs-1 text-primary"></i>
+                <div>
+                    <h3 class="fw-bold text-primary mb-0">Add New Trainer</h3>
+                    <p class="text-muted mb-0">Fill in the trainer information below</p>
+                </div>
+            </div>
 
-    <form method="post" asp-action="CreateTrainer">
+            <form method="post" asp-action="CreateTrainer" novalidate>
 
-        <!-- Trainer Info -->
-        <div class="section-header mb-3">
-            <h5 class="text-primary fw-bold">Personal Information</h5>
-            <hr class="mt-2">
-        </div>
-        <div class="row g-3">
+                <!-- Personal Information -->
+                <div class="mb-5">
+                    <h5 class="fw-bold text-secondary border-start border-4 border-primary ps-2 mb-3">
+                        <i class="bi bi-person-circle me-2"></i>Personal Information
+                    </h5>
+                    <div class="row g-3">
             <div class="col-12 col-md-6">
-                <label asp-for="Name" class="form-label"></label>
+                <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="col-12 col-md-6">
-                <label asp-for="Email" class="form-label"></label>
+                <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
             <div class="col-12 col-md-6">
-                <label asp-for="Phone" class="form-label"></label>
+                <label asp-for="Phone" class="form-label">Phone <span class="text-danger">*</span></label>
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
 
             <div class="col-12 col-md-6">
-                <label asp-for="DateOfBirth" class="form-label"></label>
+                <label asp-for="DateOfBirth" class="form-label">Date Of Birth <span class="text-danger">*</span></label>
                 <input asp-for="DateOfBirth" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
 
-            <div class="col-12 col-md-6">
-                <label asp-for="Gender" class="form-label">Gender</label>
-                <select asp-for="Gender" name="Gender" class="form-select">
-                    <option value="">-- Select Gender --</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                </select>
-            </div>
+                        <div class="col-12 col-md-6">
+                            <label asp-for="Gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                            <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<Gender>()">
+                                <option value="">-- Select Gender --</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-        </div>
-        <div class="section-header mb-3 mt-4">
-            <h5 class="text-primary fw-bold">Address Information</h5>
-            <hr class="mt-2">
-        </div>
-        <div class="row g-3">
+                <!-- Address Information -->
+                <div class="mb-5">
+                    <h5 class="fw-bold text-secondary border-start border-4 border-success ps-2 mb-3">
+                        <i class="bi bi-geo-alt me-2"></i>Address Information
+                    </h5>
+                    <div class="row g-3">
 
             <div class="col-12 col-md-6">
                 <label asp-for="BuildingNumber" class="form-label"></label>
@@ -63,57 +71,55 @@
             </div>
 
             <div class="col-12 col-md-6">
-                <label asp-for="Street" class="form-label"></label>
+                <label asp-for="Street" class="form-label">Street <span class="text-danger">*</span></label>
                 <input asp-for="Street" class="form-control" />
                 <span asp-validation-for="Street" class="text-danger"></span>
             </div>
-            <div class="col-12 col-md-6">
-                <label asp-for="City" class="form-label"></label>
-                <input asp-for="City" class="form-control" />
-                <span asp-validation-for="City" class="text-danger"></span>
-            </div>
-        </div>
-        <!-- Professional Information -->
-        <div class="section-header mb-3">
-            <h5 class="text-primary fw-bold">Professional Information</h5>
-            <hr class="mt-2">
-        </div>
-        <div class="row g-3">
-            <div class="col-12">
-                <label class="form-label fw-semibold">
-                    Specializations <span class="text-danger">*</span>
-                </label>
+                        <div class="col-12 col-md-6">
+                            <label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                            <input asp-for="City" class="form-control" />
+                            <span asp-validation-for="City" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
 
-                <div class="form-check">
-                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization"
-                           value="GeneralFitness" />
-                    <label asp-for="Specialization" class="form-check-label">GeneralFitness</label>
+                <!-- Professional Information -->
+                <div class="mb-5">
+                    <h5 class="fw-bold text-secondary border-start border-4 border-info ps-2 mb-3">
+                        <i class="bi bi-award me-2"></i>Professional Information
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                Specialization <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex flex-wrap gap-3">
+                                @foreach (var speciality in Enum.GetValues(typeof(Speicalites)))
+                                {
+                                    <div class="form-check">
+                                        <input asp-for="Specialization" type="radio" value="@speciality" id="@speciality" class="form-check-input" />
+                                        <label class="form-check-label" for="@speciality">@speciality</label>
+                                    </div>
+                                }
+                            </div>
+                            <span asp-validation-for="Specialization" class="text-danger"></span>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-check">
-                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization" value="Yoga" />
-                    <label asp-for="Specialization" class="form-check-label">Yoga</label>
+
+                <div class="d-flex justify-content-end gap-3 border-top pt-4 mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
+                        <i class="bi bi-check-lg"></i> Add Trainer
+                    </button>
                 </div>
-                <div class="form-check">
-                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization" value="Boxing" />
-                    <label asp-for="Specialization" class="form-check-label">Boxing</label>
-                </div>
-                <div class="form-check">
-                    <input asp-for="Specialization" class="form-check-input" type="radio" name="Specialization" value="CrossFit" />
-                    <label asp-for="Specialization" class="form-check-label">CrossFit</label>
-                </div>
-                
-                <span asp-validation-for="Specialization" class="text-danger"></span>
-            </div>
+            </form>
         </div>
-
-        <footer class="d-flex justify-content-end mt-4">
-            <button type="submit" class="btn btn-fill">Add</button>
-        </footer>
-    </form>
-
+    </div>
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

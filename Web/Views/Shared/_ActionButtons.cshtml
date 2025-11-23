@@ -1,0 +1,38 @@
+@* 
+    Reusable Action Buttons Partial
+    Usage: <partial name="_ActionButtons" />
+    ViewData options:
+    - CancelUrl: URL for cancel button (default: "#")
+    - CancelText: Cancel button text (default: "Cancel")
+    - SubmitText: Submit button text (default: "Save")
+    - SubmitIcon: Submit button icon (default: "check-lg")
+    - ShowCancel: Show cancel button (default: true)
+    - SubmitButtonClass: Additional classes for submit button (default: "btn-primary")
+*@
+@{
+    var cancelUrl = ViewData["CancelUrl"] as string ?? "#";
+    var cancelText = ViewData["CancelText"] as string ?? "Cancel";
+    var submitText = ViewData["SubmitText"] as string ?? "Save";
+    var submitIcon = ViewData["SubmitIcon"] as string ?? "check-lg";
+    var showCancel = ViewData["ShowCancel"] as bool? ?? true;
+    var submitButtonClass = ViewData["SubmitButtonClass"] as string ?? "btn-primary";
+}
+
+<div class="d-flex justify-content-between gap-3 border-top pt-4 mt-4">
+    @if (showCancel)
+    {
+        <a href="@cancelUrl" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+            <i class="bi bi-x-circle"></i>
+            @cancelText
+        </a>
+    }
+    else
+    {
+        <div></div>
+    }
+    <button type="submit" class="btn @submitButtonClass d-flex align-items-center gap-2">
+        <i class="bi bi-@(submitIcon)"></i>
+        @submitText
+    </button>
+</div>
+

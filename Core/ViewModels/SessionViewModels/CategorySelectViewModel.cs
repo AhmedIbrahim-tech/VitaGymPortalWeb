@@ -1,8 +1,7 @@
-﻿namespace Core.ViewModels
+﻿namespace Core.ViewModels.SessionViewModels;
+
+public class CategorySelectViewModel
 {
-	public class CategorySelectViewModel
-	{
-		public int Id { get; set; }
-		public string Name { get; set; } = null!;
-	}
+	public int Id { get; set; }
+	public string Name { get; set; } = null!;
 }

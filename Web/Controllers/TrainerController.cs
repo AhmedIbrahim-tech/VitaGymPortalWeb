@@ -1,118 +1,140 @@
-﻿namespace Web.Controllers
+﻿namespace Web.Controllers;
+
+[Authorize(Roles = "SuperAdmin")]
+public class TrainerController(ITrainerService _trainerService, IToastNotification _toastNotification) : Controller
 {
-    [Authorize(Roles ="SuperAdmin")]
-    public class TrainerController : Controller
+    #region Get Trainers
+
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        private readonly ITrainerService _trainerService;
+        var trainers = await _trainerService.GetAllTrainersAsync(cancellationToken);
 
-        public TrainerController(ITrainerService trainerService)
-        {
-            _trainerService = trainerService;
-        }
-        public IActionResult Index()
-        {
-            var trainers = _trainerService.GetAllTrainers();
-            return View(trainers);
-        }
+        ViewData["Title"] = "Trainers";
+        ViewData["PageTitle"] = "Trainers List";
+        ViewData["PageSubtitle"] = "Manage your gym trainers";
+        ViewData["PageIcon"] = "person-badge";
+        ViewData["ShowActionButton"] = true;
+        ViewData["ActionButtonText"] = "Add Trainer";
+        ViewData["ActionButtonUrl"] = Url.Action("Create");
 
-        public IActionResult TrainerDetails(int Id)
+        if (trainers == null || !trainers.Any())
         {
-            var trainer = _trainerService.GetTrainerDetails(Id);
-            if (trainer == null)
-            {
-                TempData["ErrorMessage"] = "Trainer Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(trainer);
+            ViewData["EmptyIcon"] = "person-badge";
+            ViewData["EmptyTitle"] = "No Trainers Available";
+            ViewData["EmptyMessage"] = "Add your first trainer to get started";
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult CreateTrainer(CreateTrainerViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-                ModelState.AddModelError("DataMissed", "Check Missing Data!!");
-                return View(nameof(Create), input);
-            }
-
-            bool createTrainer = _trainerService.CreateTrainer(input);
-
-            if (createTrainer)
-                TempData["SuccessMessage"] = "Trainer Created Successfully!";
-            else
-                TempData["ErrorMessage"] = "Trainer Failed To Create ,Email or Phone Number Already Exists!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult TrainerEdit(int Id)
-        {
-            var trainer = _trainerService.GetTrainerToUpdate(Id);
-            if (trainer == null)
-            {
-                TempData["ErrorMessage"] = "Trainer Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(trainer);
-        }
-
-        [HttpPost]
-        public IActionResult TrainerEdit([FromRoute] int Id, TrainerToUpdateViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-
-                return View(input);
-            }
-
-            bool updateTrainer = _trainerService.UpdateTrainer(Id, input);
-
-            if (updateTrainer)
-                TempData["SuccessMessage"] = "Trainer Updated Successfully!";
-            else
-                TempData["ErrorMessage"] = "Trainer Failed To Update ,Email or Phone Number Already Exists!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult Delete(int Id)
-        {
-            if (Id <= 0)
-            {
-                TempData["ErrorMessage"] = "ID cannot be Null or Negative!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            var trainer = _trainerService.GetTrainerDetails(Id);
-            if (trainer == null)
-            {
-                TempData["ErrorMessage"] = "Trainer Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            ViewBag.TrainerId = Id;
-            return View();
-
-        }
-        [HttpPost]
-        public IActionResult DeleteConfirmed([FromForm] int id)
-        {
-            var result = _trainerService.RemoveTrainer(id);
-
-            if (result)
-                TempData["SuccessMessage"] = "Trainer Deleted Successfully!";
-            else
-                TempData["ErrorMessage"] = "Trainer Cannot be Deleted!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
+        return View(trainers);
     }
+
+    public async Task<IActionResult> TrainerDetails(int id, CancellationToken cancellationToken = default)
+    {
+        var trainer = await _trainerService.GetTrainerDetailsAsync(id, cancellationToken);
+        if (trainer == null)
+        {
+            _toastNotification.AddErrorToastMessage("Trainer Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+        return View(trainer);
+    }
+
+    #endregion
+
+    #region Create Trainer
+
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateTrainer(CreateTrainerViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            ModelState.AddModelError("DataMissed", "Check Missing Data!!");
+            return View(nameof(Create), input);
+        }
+
+        bool createTrainer = await _trainerService.CreateTrainerAsync(input, cancellationToken);
+
+        if (createTrainer)
+            _toastNotification.AddSuccessToastMessage("Trainer Created Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Trainer Failed To Create, Email or Phone Number Already Exists!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Update Trainer
+
+    public async Task<IActionResult> TrainerEdit(int id, CancellationToken cancellationToken = default)
+    {
+        var trainer = await _trainerService.GetTrainerToUpdateAsync(id, cancellationToken);
+        if (trainer == null)
+        {
+            _toastNotification.AddErrorToastMessage("Trainer Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(trainer);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> TrainerEdit([FromRoute] int id, TrainerToUpdateViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(input);
+        }
+
+        bool updateTrainer = await _trainerService.UpdateTrainerAsync(id, input, cancellationToken);
+
+        if (updateTrainer)
+            _toastNotification.AddSuccessToastMessage("Trainer Updated Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Trainer Failed To Update, Email or Phone Number Already Exists!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Delete Trainer
+
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("ID cannot be Null or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var trainer = await _trainerService.GetTrainerDetailsAsync(id, cancellationToken);
+        if (trainer == null)
+        {
+            _toastNotification.AddErrorToastMessage("Trainer Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewBag.TrainerId = id;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteConfirmed([FromForm] int id, CancellationToken cancellationToken = default)
+    {
+        var result = await _trainerService.RemoveTrainerAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Trainer Deleted Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Trainer Cannot be Deleted!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
 }

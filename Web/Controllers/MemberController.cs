@@ -1,131 +1,159 @@
-﻿using Core.Services.Interfaces;
+﻿namespace Web.Controllers;
 
-namespace Web.Controllers
+[Authorize]
+public class MemberController(IMemberService _memberService, IToastNotification _toastNotification) : Controller
 {
-    [Authorize]
-    public class MemberController : Controller
+    #region Get Members
+
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        private readonly IMemberService _memberService;
+        var members = await _memberService.GetAllMembersAsync(cancellationToken);
 
-        public MemberController(IMemberService memberService)
-        {
-            _memberService = memberService;
-        }
-        public IActionResult Index()
-        {
-            var members = _memberService.GetAllMembers();
-            return View(members);
-        }
+        ViewData["Title"] = "Members";
+        ViewData["PageTitle"] = "Members List";
+        ViewData["PageSubtitle"] = "Manage your gym members";
+        ViewData["PageIcon"] = "people";
+        ViewData["ShowActionButton"] = true;
+        ViewData["ActionButtonText"] = "Add Member";
+        ViewData["ActionButtonUrl"] = Url.Action("Create");
+        ViewData["ActionButtonIcon"] = "person-plus";
 
-        public IActionResult MemberDetails(int Id)
+        if (members == null || !members.Any())
         {
-            var member = _memberService.GetMemberDetails(Id);
-            if(member == null)
-            {
-                TempData["ErrorMessage"] = "Member Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(member);
+            ViewData["EmptyIcon"] = "people";
+            ViewData["EmptyTitle"] = "No Members Available";
+            ViewData["EmptyMessage"] = "Add your first member to get started";
         }
 
-        public IActionResult HealthRecordDetails(int Id)
-        {
-            var healthRecord = _memberService.GetMemberHealthRecord(Id);
-            if (healthRecord == null)
-            {
-                TempData["ErrorMessage"] = "Health Record is Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-            return View(healthRecord);
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-        [HttpPost]
-        public IActionResult CreateMember(CreateMemberViewModel input)
-        {
-            if(!ModelState.IsValid)
-            {
-                ModelState.AddModelError("DataMissed", "Check Missing Data!!");
-                return View(nameof(Create),input);
-            }
-
-            bool createMember = _memberService.CreateMember(input);
-
-            if(createMember)
-                TempData["SuccessMessage"] = "Member Created Successfully!";
-            else
-                TempData["ErrorMessage"] = "Member Failed To Create ,Email or Phone Number Already Exists!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult MemberEdit(int Id)
-        {
-            var member = _memberService.GetMemberToUpdate(Id);
-            if (member == null)
-            {
-                TempData["ErrorMessage"] = "Member Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(member);
-        }
-
-        [HttpPost]
-        public IActionResult MemberEdit([FromRoute]int Id,MemberToUpdateViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-               
-                return View(input);
-            }
-          
-            bool updateMember = _memberService.UpdateMember(Id,input);
-
-            if (updateMember)
-                TempData["SuccessMessage"] = "Member Updated Successfully!";
-            else
-                TempData["ErrorMessage"] = "Member Failed To Update ,Email or Phone Number Already Exists!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        public IActionResult Delete(int Id)
-        {
-            if(Id <= 0)
-            {
-               TempData["ErrorMessage"] = "ID cannot be Null or Negative!";
-               return RedirectToAction(nameof(Index));
-            }
-
-            var member = _memberService.GetMemberDetails(Id);
-            if (member == null)
-            {
-                TempData["ErrorMessage"] = "Member Not Found!";
-                return RedirectToAction(nameof(Index));
-            }
-            
-            ViewBag.MemberId = Id;
-            return View();
-
-        }
-        [HttpPost]
-        public IActionResult DeleteConfirmed([FromForm]int id)
-        {
-            var result = _memberService.RemoveMember(id);
-
-            if (result)
-                TempData["SuccessMessage"] = "Member Deleted Successfully!";
-            else
-                TempData["ErrorMessage"] = "Member Cannot be Deleted!";
-
-            return RedirectToAction(nameof(Index));
-
-        }
+        return View(members);
     }
+
+    public async Task<IActionResult> MemberDetails(int id, CancellationToken cancellationToken = default)
+    {
+        var member = await _memberService.GetMemberDetailsAsync(id, cancellationToken);
+        if (member == null)
+        {
+            _toastNotification.AddErrorToastMessage("Member Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+        return View(member);
+    }
+
+    public async Task<IActionResult> HealthRecordDetails(int id, CancellationToken cancellationToken = default)
+    {
+        var healthRecord = await _memberService.GetMemberHealthRecordAsync(id, cancellationToken);
+        if (healthRecord == null)
+        {
+            _toastNotification.AddErrorToastMessage("Health Record is Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+        return View(healthRecord);
+    }
+
+    #endregion
+
+    #region Create Member
+
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateMember(CreateMemberViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            _toastNotification.AddErrorToastMessage("Please check the form and fix any validation errors.");
+            return View(nameof(Create), input);
+        }
+
+        if (input.FormFile == null || input.FormFile.Length == 0)
+        {
+            ModelState.AddModelError(nameof(input.FormFile), "Profile photo is required.");
+            _toastNotification.AddErrorToastMessage("Profile photo is required.");
+            return View(nameof(Create), input);
+        }
+
+        bool createMember = await _memberService.CreateMemberAsync(input, cancellationToken);
+
+        if (createMember)
+            _toastNotification.AddSuccessToastMessage("Member Created Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Member Failed To Create. Email or Phone Number Already Exists, or Photo Upload Failed!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Update Member
+
+    public async Task<IActionResult> MemberEdit(int id, CancellationToken cancellationToken = default)
+    {
+        var member = await _memberService.GetMemberToUpdateAsync(id, cancellationToken);
+        if (member == null)
+        {
+            _toastNotification.AddErrorToastMessage("Member Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(member);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> MemberEdit([FromRoute] int id, MemberToUpdateViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(input);
+        }
+
+        bool updateMember = await _memberService.UpdateMemberAsync(id, input, cancellationToken);
+
+        if (updateMember)
+            _toastNotification.AddSuccessToastMessage("Member Updated Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Member Failed To Update, Email or Phone Number Already Exists!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Delete Member
+
+    public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("ID cannot be Null or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var member = await _memberService.GetMemberDetailsAsync(id, cancellationToken);
+        if (member == null)
+        {
+            _toastNotification.AddErrorToastMessage("Member Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        ViewBag.MemberId = id;
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> DeleteConfirmed([FromForm] int id, CancellationToken cancellationToken = default)
+    {
+        var result = await _memberService.RemoveMemberAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Member Deleted Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Member Cannot be Deleted!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
 }

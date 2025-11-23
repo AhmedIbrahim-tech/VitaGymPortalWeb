@@ -1,29 +1,38 @@
-﻿namespace Infrastructure.Repositories.Classes
+﻿namespace Infrastructure.Repositories.Classes;
+
+public class GenericRepository<TEntity>(ApplicationDbContext _context) : IGenericRepository<TEntity> where TEntity : BaseEntity
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+    public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>>? condition = null, CancellationToken cancellationToken = default, params Expression<Func<TEntity, object>>[] includes)
     {
-        private readonly GymDbContext _context;
+        var query = _context.Set<TEntity>().AsNoTracking();
 
-        public GenericRepository(GymDbContext context)
+        if (includes != null && includes.Length > 0)
         {
-            _context = context;
-        }
-        public void Add(TEntity entity) => _context.Add(entity);
-
-        public void Delete(TEntity entity) => _context.Remove(entity);
-       
-        public IEnumerable<TEntity> GetAll(Func<TEntity, bool>? condition = null)
-        {
-            if (condition == null)
+            foreach (var include in includes)
             {
-                return _context.Set<TEntity>().AsNoTracking().ToList();
+                query = query.Include(include);
             }
-            return _context.Set<TEntity>().AsNoTracking().Where(condition).ToList();
         }
 
-        public TEntity? GetByID(int id) => _context.Set<TEntity>().Find(id);
+        if (condition != null)
+        {
+            query = query.Where(condition);
+        }
 
-        public void Update(TEntity entity) => _context.Update(entity);
-
+        return await query.ToListAsync(cancellationToken);
     }
+
+    public async Task<TEntity?> GetByIDAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await _context.Set<TEntity>().FindAsync([id], cancellationToken);
+    }
+
+    public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        await _context.AddAsync(entity, cancellationToken);
+    }
+
+    public void Delete(TEntity entity) => _context.Remove(entity);
+
+    public void Update(TEntity entity) => _context.Update(entity);
 }

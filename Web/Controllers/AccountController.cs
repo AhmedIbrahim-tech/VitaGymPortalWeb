@@ -1,59 +1,64 @@
-﻿using Infrastructure.Entities;
+﻿using Infrastructure.Entities.Users;
 
-namespace Web.Controllers
+namespace Web.Controllers;
+
+public class AccountController(IAccountService _accountService, SignInManager<ApplicationUser> _signInManager) : Controller
 {
-    public class AccountController : Controller
+    #region Login
+
+    public IActionResult Login()
     {
-        private readonly IAccountService _accountService;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction("Index", "Home");
+        return View();
+    }
 
-        public AccountController(IAccountService accountService,SignInManager<ApplicationUser> signInManager)
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
         {
-            _accountService = accountService;
-            _signInManager = signInManager;
-        }
-        public IActionResult Login()
-        {
-            if (User.Identity.IsAuthenticated)
-               return RedirectToAction("Index", "Home");
-            return View();
-        }
-
-        [HttpPost]
-        public IActionResult Login(LoginViewModel input)
-        {
-            if(!ModelState.IsValid)
-            {
-                return View(input);
-            }
-            var user =_accountService.ValidiateUser(input);
-            if(user == null)
-            {
-                ModelState.AddModelError("InvalidLogin", "Email or Password is not Vaild");
-                return View(input);
-            }
-
-            var result = _signInManager.PasswordSignInAsync(user, input.Password, input.RememberMe, false).Result;
-
-            if(result.IsNotAllowed)
-                ModelState.AddModelError("InvalidLogin", "User is not Allowed To Login");
-            if (result.IsLockedOut)
-                ModelState.AddModelError("InvalidLogin", "User is Locked out and not Allowed To Login");
-            if (result.Succeeded)
-               return RedirectToAction("Index", "Home");
-            
             return View(input);
         }
-        [HttpPost]
-        public IActionResult Logout()
+
+        var user = await _accountService.ValidateUserAsync(input, cancellationToken);
+        if (user == null)
         {
-            _signInManager.SignOutAsync().GetAwaiter().GetResult();
-            return RedirectToAction("Login", "Account");
+            ModelState.AddModelError("InvalidLogin", "Email or Password is not Valid");
+            return View(input);
         }
 
-        public IActionResult AccessDenied()
-        {
-            return View();
-        }
+        var result = await _signInManager.PasswordSignInAsync(user, input.Password, input.RememberMe, false);
+
+        if (result.IsNotAllowed)
+            ModelState.AddModelError("InvalidLogin", "User is not Allowed To Login");
+        if (result.IsLockedOut)
+            ModelState.AddModelError("InvalidLogin", "User is Locked out and not Allowed To Login");
+        if (result.Succeeded)
+            return RedirectToAction("Index", "Home");
+
+        return View(input);
     }
+
+    #endregion
+
+    #region Logout
+
+    [HttpPost]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+        return RedirectToAction("Login", "Account");
+    }
+
+    #endregion
+
+    #region Access Denied
+
+    public IActionResult AccessDenied()
+    {
+        return View();
+    }
+
+    #endregion
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Infrastructure.Entities.Users;
+using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Data.Configurations
 {
     public class TrainerConfiguration : GymUserConfiguration<Trainer>,IEntityTypeConfiguration<Trainer>

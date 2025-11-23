@@ -1,19 +1,14 @@
-﻿
+﻿namespace Infrastructure.Repositories.Classes;
 
-namespace Infrastructure.Repositories.Classes
+public class MembershipRepository(ApplicationDbContext _context) : GenericRepository<MemberShip>(_context), IMembershipRepository
 {
-	public class MembershipRepository : GenericRepository<MemberShip>, IMembershipRepository
+    public async Task<IEnumerable<MemberShip>> GetAllMembershipsWithMemberAndPlanAsync(Expression<Func<MemberShip, bool>> predicate, CancellationToken cancellationToken = default)
 	{
-		private readonly GymDbContext _dbContext;
-
-		public MembershipRepository(GymDbContext dbContext) : base(dbContext)
-		{
-			_dbContext = dbContext;
-		}
-
-		public IEnumerable<MemberShip> GetAllMembershipsWithMemberAndPlan(Func<MemberShip, bool> predicate)
-		{
-			return _dbContext.MemberShips.Include(X => X.Plan).Include(X => X.Member).Where(predicate).ToList();
-		}
+		return await _context.MemberShips
+			.Include(x => x.Plan)
+			.Include(x => x.Member)
+			.AsNoTracking()
+			.Where(predicate)
+            .ToListAsync(cancellationToken);
 	}
 }

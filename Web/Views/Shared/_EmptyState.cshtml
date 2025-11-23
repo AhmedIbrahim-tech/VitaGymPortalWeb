@@ -1,0 +1,35 @@
+@* 
+    Reusable Empty State Partial
+    Usage: <partial name="_EmptyState" model="Your message here" />
+    ViewData options:
+    - EmptyIcon: Bootstrap icon name (default: "inbox")
+    - EmptyTitle: Title text (default: "No Items Available")
+    - EmptyMessage: Message text (default: model or "Add your first item to get started")
+    - ShowActionButton: Show action button (default: false)
+    - ActionButtonText: Button text
+    - ActionButtonUrl: Button URL
+*@
+@model string
+
+@{
+    var icon = ViewData["EmptyIcon"] as string ?? "inbox";
+    var title = ViewData["EmptyTitle"] as string ?? "No Items Available";
+    var message = ViewData["EmptyMessage"] as string ?? Model ?? "Add your first item to get started";
+    var showActionButton = ViewData["ShowActionButton"] as bool? ?? false;
+    var actionButtonText = ViewData["ActionButtonText"] as string ?? "Add New";
+    var actionButtonUrl = ViewData["ActionButtonUrl"] as string ?? "#";
+}
+
+<div class="text-center py-5 my-5">
+    <div class="mb-4">
+        <i class="bi bi-@(icon) display-1 text-muted opacity-50"></i>
+    </div>
+    <h4 class="fw-semibold text-muted mb-3">@title</h4>
+    <p class="text-muted mb-4">@message</p>
+    @if (showActionButton)
+    {
+        <a href="@actionButtonUrl" class="btn btn-primary">
+            @actionButtonText
+        </a>
+    }
+</div>

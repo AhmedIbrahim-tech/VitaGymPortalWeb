@@ -1,16 +1,7 @@
-﻿using Infrastructure.Contexts;
+﻿using Infrastructure.Entities.Users;
 
-namespace Infrastructure.Repositories.Classes
+namespace Infrastructure.Repositories.Classes;
+
+public class MemberRepository(ApplicationDbContext _context) : GenericRepository<Member>(_context), IMemberRepository
 {
-    public class MemberRepository : GenericRepository<Member>, IMemberRepository
-    {
-        public MemberRepository(GymDbContext context) : base(context)
-        {
-        }
-
-        public IEnumerable<Session> GetAllSessions()
-        {
-            throw new NotImplementedException();
-        }
-    }
 }

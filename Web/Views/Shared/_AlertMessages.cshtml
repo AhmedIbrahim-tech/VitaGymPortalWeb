@@ -1,0 +1,57 @@
+@* 
+    Reusable Alert Messages Partial
+    Supports: SuccessMessage, ErrorMessage, Warning, Info, Success, Error
+*@
+@{
+    var alertType = "";
+    var alertMessage = "";
+    var alertIcon = "";
+    
+    if (TempData["SuccessMessage"] != null)
+    {
+        alertType = "success";
+        alertMessage = TempData["SuccessMessage"]?.ToString() ?? "";
+        alertIcon = "check-circle-fill";
+    }
+    else if (TempData["ErrorMessage"] != null)
+    {
+        alertType = "danger";
+        alertMessage = TempData["ErrorMessage"]?.ToString() ?? "";
+        alertIcon = "exclamation-triangle-fill";
+    }
+    else if (TempData["Success"] != null)
+    {
+        alertType = "success";
+        alertMessage = TempData["Success"]?.ToString() ?? "";
+        alertIcon = "check-circle-fill";
+    }
+    else if (TempData["Error"] != null)
+    {
+        alertType = "danger";
+        alertMessage = TempData["Error"]?.ToString() ?? "";
+        alertIcon = "exclamation-triangle-fill";
+    }
+    else if (TempData["Warning"] != null)
+    {
+        alertType = "warning";
+        alertMessage = TempData["Warning"]?.ToString() ?? "";
+        alertIcon = "exclamation-triangle-fill";
+    }
+    else if (TempData["Info"] != null)
+    {
+        alertType = "info";
+        alertMessage = TempData["Info"]?.ToString() ?? "";
+        alertIcon = "info-circle-fill";
+    }
+}
+
+@if (!string.IsNullOrEmpty(alertType) && !string.IsNullOrEmpty(alertMessage))
+{
+    <div id="Alert" class="alert alert-@alertType alert-dismissible fade show shadow-sm" role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-@alertIcon me-2 fs-5"></i>
+            <div class="flex-grow-1">@alertMessage</div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+}

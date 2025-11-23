@@ -7,6 +7,7 @@ namespace Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<MemberShip> builder)
         {
             builder.Ignore(b => b.Id);
+            builder.Ignore(b => b.Status);
 
             builder.Property(b => b.CreatedAt)
                 .HasColumnName("StartDate")

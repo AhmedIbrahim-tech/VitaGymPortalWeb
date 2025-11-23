@@ -1,6 +1,38 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="content">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="card-title mb-0">@ViewData["Title"]</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="mb-3">VitaGym Portal Privacy Policy</h5>
+                        <p class="mb-3">
+                            This privacy policy describes how VitaGym Portal collects, uses, and protects your personal information.
+                        </p>
+                        <h6 class="mt-4 mb-2">Information We Collect</h6>
+                        <p class="mb-3">
+                            We collect information that you provide directly to us, including member information, trainer details, and session bookings.
+                        </p>
+                        <h6 class="mt-4 mb-2">How We Use Your Information</h6>
+                        <p class="mb-3">
+                            We use the information we collect to manage gym operations, process memberships, schedule sessions, and improve our services.
+                        </p>
+                        <h6 class="mt-4 mb-2">Data Protection</h6>
+                        <p class="mb-3">
+                            We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.
+                        </p>
+                        <div class="mt-4">
+                            <a href="@Url.Action("Index", "Home")" class="btn btn-primary">
+                                <i class="ti ti-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>

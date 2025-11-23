@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-namespace Core.Services.AttachmentService
+﻿namespace Core.Services.AttachmentService
 {
     public interface IAttachmentService
     {

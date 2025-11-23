@@ -1,18 +1,7 @@
-﻿using Infrastructure.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Infrastructure.Entities.Users;
 
-namespace Infrastructure.Repositories.Interfaces
+namespace Infrastructure.Repositories.Interfaces;
+
+public interface ITrainerRepository : IGenericRepository<Trainer>
 {
-    public interface ITrainerRepository
-    {
-        Trainer GetByID(int id);
-        IEnumerable<Trainer> GetAll();
-        int Add(Trainer trainer);
-        int Update(Trainer trainer);
-        int Delete(int id);
-    }
 }

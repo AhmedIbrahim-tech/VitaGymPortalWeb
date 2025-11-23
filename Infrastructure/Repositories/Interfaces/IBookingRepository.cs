@@ -1,19 +1,9 @@
-﻿
+﻿namespace Infrastructure.Repositories.Interfaces;
 
-namespace Infrastructure.Repositories.Interfaces
+public interface IBookingRepository : IGenericRepository<Booking>
 {
-	public interface IBookingRepository : IGenericRepository<Booking>
-	{
-
-		// Get All Available Session For Manage Member Session
-		// (Upcoming => For New Booking )
-		// (Ongoing => For Attending ) 
-
-		// Get Session By Id With Data Of Member [Id - Name - Is Attended Flag]
-		IEnumerable<Booking> GetBySessionId(int sessionId);
-
-		// Add Member Session Using Add Of Generic Repository 
-		// Cancel  Member Session Using Remove Of Generic Repository 
-		// Is  Member Attended Session Using Update Of Generic Repository 
-	}
+	/// <summary>
+	/// Get all bookings for a specific session with member information
+	/// </summary>
+	Task<IEnumerable<Booking>> GetBySessionIdAsync(int sessionId, CancellationToken cancellationToken = default);
 }

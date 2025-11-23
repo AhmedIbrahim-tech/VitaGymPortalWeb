@@ -1,20 +1,13 @@
-﻿
+﻿namespace Infrastructure.Repositories.Classes;
 
-namespace Infrastructure.Repositories.Classes
+public class BookingRepository(ApplicationDbContext _context) : GenericRepository<Booking>(_context), IBookingRepository
 {
-	public class BookingRepository : GenericRepository<Booking>, IBookingRepository
+    public async Task<IEnumerable<Booking>> GetBySessionIdAsync(int sessionId, CancellationToken cancellationToken = default)
 	{
-		private readonly GymDbContext _dbContext;
-
-		public BookingRepository(GymDbContext dbContext) : base(dbContext)
-		{
-			_dbContext = dbContext;
-		}
-		public IEnumerable<Booking> GetBySessionId(int sessionId)
-		{
-			return _dbContext.Bookings.Include(X => X.Member)
-									  .Where(X => X.SessionId == sessionId).ToList();
-		}
-
+		return await _context.Bookings
+			.Include(x => x.Member)
+			.AsNoTracking()
+			.Where(x => x.SessionId == sessionId)
+			.ToListAsync(cancellationToken);
 	}
 }

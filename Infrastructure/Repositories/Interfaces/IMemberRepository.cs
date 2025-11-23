@@ -1,10 +1,8 @@
-﻿using Infrastructure.Entities;
+﻿using Infrastructure.Entities.Users;
 
-namespace Infrastructure.Repositories.Interfaces
+namespace Infrastructure.Repositories.Interfaces;
+
+public interface IMemberRepository : IGenericRepository<Member>
 {
-    public interface IMemberRepository : IGenericRepository<Member>
-    {
-        IEnumerable<Session> GetAllSessions();        
-
-    }
+    // TODO: Implement if needed, or remove if not used
 }

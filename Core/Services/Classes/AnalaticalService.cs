@@ -1,24 +1,34 @@
-﻿namespace Core.Services.Classes;
+﻿using Infrastructure.Entities.Users;
 
-public class AnalaticalService : IAnalaticalService
+namespace Core.Services.Classes;
+
+public class AnalaticalService(IUnitOfWork _unitOfWork) : IAnalaticalService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    public AnalaticalService(IUnitOfWork unitOfWork)
-    {
-        _unitOfWork = unitOfWork;
-    }
+    #region Get Analytical Data
 
-    public AnalaticalViewModel GetAnalaticalData()
+    public async Task<AnalaticalViewModel> GetAnalaticalDataAsync(CancellationToken cancellationToken = default)
     {
-        var SessionRepo = _unitOfWork.GetRepository<Session>();
+        var activeMemberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
+            x => x.EndDate >= DateTime.Now, cancellationToken);
+        var totalMembers = await _unitOfWork.GetRepository<Member>().GetAllAsync(null, cancellationToken);
+        var totalTrainers = await _unitOfWork.GetRepository<Trainer>().GetAllAsync(null, cancellationToken);
+        var upcomingSessions = await _unitOfWork.GetRepository<Session>().GetAllAsync(
+            s => s.StartDate > DateTime.Now, cancellationToken);
+        var ongoingSessions = await _unitOfWork.GetRepository<Session>().GetAllAsync(
+            s => s.StartDate <= DateTime.Now && s.EndDate >= DateTime.Now, cancellationToken);
+        var completedSessions = await _unitOfWork.GetRepository<Session>().GetAllAsync(
+            s => s.EndDate < DateTime.Now, cancellationToken);
+
         return new AnalaticalViewModel
         {
-            ActiveMembers = _unitOfWork.GetRepository<MemberShip>().GetAll(x=>x.Status=="Active").Count(),
-            TotalMembers = _unitOfWork.GetRepository<Member>().GetAll().Count(),
-            TotalTrainers = _unitOfWork.GetRepository<Trainer>().GetAll().Count(),
-            UpcomingSessions = SessionRepo.GetAll(s => s.StartDate > DateTime.Now).Count(),
-            OngoingSessions = SessionRepo.GetAll(s => s.StartDate <= DateTime.Now && s.EndDate >= DateTime.Now).Count(),
-            CompletedSessions = SessionRepo.GetAll(s => s.EndDate < DateTime.Now).Count()
+            ActiveMembers = activeMemberships.Count(),
+            TotalMembers = totalMembers.Count(),
+            TotalTrainers = totalTrainers.Count(),
+            UpcomingSessions = upcomingSessions.Count(),
+            OngoingSessions = ongoingSessions.Count(),
+            CompletedSessions = completedSessions.Count()
         };
     }
+
+    #endregion
 }

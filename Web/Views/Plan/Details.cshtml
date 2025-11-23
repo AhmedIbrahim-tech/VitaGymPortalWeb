@@ -1,19 +1,20 @@
-﻿@model PlanViewModel
+﻿@using Core.ViewModels.PlanViewModels
+@model PlanViewModel
 @{
     ViewData["Title"] = "Plan Details";
-   
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow-lg border-0">
-                <div class="card-header @(Model.IsActive ? "bg-primary-color" : "bg-secondary") text-white text-center py-5">
+            <div class="card shadow-lg border-primary rounded-5">
+                <div class="card-header @(Model.IsActive ? "bg-primary" : "bg-secondary") text-center py-3 rounded-top-5">
                     <i class="bi bi-award display-4 mb-3"></i>
                     <h2 class="mb-0">@Model.Name</h2>
                 </div>
                 <div class="card-body p-4">
-                    <div class="text-center mb-4 py-3 bg-light rounded">
+                    <div class="text-center mb-4 py-3 rounded">
                         <div class="display-3 fw-bold text-primary-color">@Model.Price.ToString("N0")</div>
                         <small class="text-muted fs-5">EGP</small>
                     </div>
@@ -70,10 +71,10 @@
                     </div>
                 </div>
 
-                <div class="card-footer bg-white border-0 p-4">
-                    <div class="d-flex justify-content-between gap-2">
-                        <a asp-action="Index" class="btn btn-outline flex-fill">
-                            <i class="bi bi-arrow-left me-1"></i>Back
+                <div class="card-footer border-0 p-4">
+                    <div class="d-flex justify-content-center">
+                        <a asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
+                            <i class="bi bi-arrow-left"></i> Back to List
                         </a>
                     </div>
                 </div>

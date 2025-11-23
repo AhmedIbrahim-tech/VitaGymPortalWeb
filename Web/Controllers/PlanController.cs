@@ -1,89 +1,100 @@
-﻿namespace Web.Controllers
+﻿namespace Web.Controllers;
+
+[Authorize(Roles = "SuperAdmin")]
+public class PlanController(IPlanService _planService, IToastNotification _toastNotification) : Controller
 {
-    [Authorize(Roles = "SuperAdmin")]
-    public class PlanController : Controller
+    #region Get Plans
+
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        private readonly IPlanService _planService;
+        var plans = await _planService.GetAllPlansAsync(cancellationToken);
 
-        public PlanController(IPlanService planService)
+        ViewData["Title"] = "Plans";
+
+        if (plans == null || !plans.Any())
         {
-            _planService = planService;
-        }
-        public IActionResult Index()
-        {
-            var plans = _planService.GetAllPlans();
-            return View(plans);
-        }
-
-        public IActionResult Details(int Id)
-        {
-            if(Id <= 0)
-            {
-                TempData["ErrorMessage"] = "Plan ID can Not be Zero or Negative!";
-
-                return RedirectToAction(nameof(Index));
-            }
-            var plan = _planService.GetPlanById(Id);
-            if(plan == null)
-            {
-                TempData["ErrorMessage"] = "Member Not Found!";
-                return RedirectToAction(nameof(Index));
-
-            }
-            return View(plan);
+            ViewData["EmptyIcon"] = "inbox";
+            ViewData["EmptyTitle"] = "No Plans Available";
+            ViewData["EmptyMessage"] = "Create your first membership plan to get started";
         }
 
-        public IActionResult Edit(int Id)
-        {
-            var plan = _planService.GetPlanToUpdate(Id);
-            if (plan == null)
-            {
-                TempData["ErrorMessage"] = "Plan Can not be Edited!";
-                return RedirectToAction(nameof(Index));
-            }
-
-            return View(plan);
-        }
-
-        [HttpPost]
-        public IActionResult Edit([FromRoute] int Id, UpdatePlanViewModel input)
-        {
-            if (!ModelState.IsValid)
-            {
-
-                return View(input);
-            }
-
-            bool updatePlan = _planService.UpdatePlan(Id, input);
-
-            if (updatePlan)
-                TempData["SuccessMessage"] = "Plan Updated Successfully!";
-            else
-                TempData["ErrorMessage"] = "Plan Failed To Update !";
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        [HttpPost]
-        public IActionResult Activate(int Id)
-        {
-            if (Id <= 0)
-            {
-                TempData["ErrorMessage"] = "Plan ID can Not be Zero or Negative!";
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            var activate = _planService.Activate(Id);
-
-            if (activate)
-                TempData["SuccessMessage"] = "Plan Activated Successfully!";
-            else
-                TempData["ErrorMessage"] = "Plan Failed To Activate !";
-
-            return RedirectToAction(nameof(Index));
-        }
-
+        return View(plans);
     }
+
+    public async Task<IActionResult> Details(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("Plan ID can Not be Zero or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var plan = await _planService.GetPlanByIdAsync(id, cancellationToken);
+        if (plan == null)
+        {
+            _toastNotification.AddErrorToastMessage("Plan Not Found!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(plan);
+    }
+
+    #endregion
+
+    #region Update Plan
+
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken = default)
+    {
+        var plan = await _planService.GetPlanToUpdateAsync(id, cancellationToken);
+        if (plan == null)
+        {
+            _toastNotification.AddErrorToastMessage("Plan Can not be Edited!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View(plan);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit([FromRoute] int id, UpdatePlanViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(input);
+        }
+
+        bool updatePlan = await _planService.UpdatePlanAsync(id, input, cancellationToken);
+
+        if (updatePlan)
+            _toastNotification.AddSuccessToastMessage("Plan Updated Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Plan Failed To Update!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Activate/Deactivate Plan
+
+    [HttpPost]
+    public async Task<IActionResult> Activate(int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("Plan ID can Not be Zero or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var activate = await _planService.ActivateAsync(id, cancellationToken);
+
+        if (activate)
+            _toastNotification.AddSuccessToastMessage("Plan Activated Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Plan Failed To Activate!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
 }

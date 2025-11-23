@@ -1,10 +1,9 @@
-﻿namespace Core.ViewModels
-{
-	public class CreateMemberShipViewModel
-	{
-		public int PlanId { get; set; }
-		public int MemberId { get; set; }
-		public DateTime? StartDate { get; set; }
+﻿namespace Core.ViewModels.MembershipViewModels;
 
-	}
+public class CreateMemberShipViewModel
+{
+	public int PlanId { get; set; }
+	public int MemberId { get; set; }
+	public DateTime? StartDate { get; set; }
+
 }

@@ -1,16 +1,12 @@
-﻿using Core.ViewModels;
+﻿namespace Core.Services.Interfaces;
 
-namespace Core.Services.Interfaces
+public interface IMemberService
 {
-    public interface IMemberService 
-    {
-        public bool CreateMember(CreateMemberViewModel memberViewModel);
-        public bool UpdateMember(int id, MemberToUpdateViewModel memberViewModel);
-        public bool RemoveMember(int id);
-        public IEnumerable<MemberViewModel> GetAllMembers();
-        public MemberViewModel? GetMemberDetails(int id);
-        public HealthRecordViewModel? GetMemberHealthRecord(int id);
-        public MemberToUpdateViewModel? GetMemberToUpdate(int id);
-
-    }
+    Task<bool> CreateMemberAsync(CreateMemberViewModel memberViewModel, CancellationToken cancellationToken = default);
+    Task<bool> UpdateMemberAsync(int id, MemberToUpdateViewModel memberViewModel, CancellationToken cancellationToken = default);
+    Task<bool> RemoveMemberAsync(int id, CancellationToken cancellationToken = default);
+    Task<IEnumerable<MemberViewModel>> GetAllMembersAsync(CancellationToken cancellationToken = default);
+    Task<MemberViewModel?> GetMemberDetailsAsync(int id, CancellationToken cancellationToken = default);
+    Task<HealthRecordViewModel?> GetMemberHealthRecordAsync(int id, CancellationToken cancellationToken = default);
+    Task<MemberToUpdateViewModel?> GetMemberToUpdateAsync(int id, CancellationToken cancellationToken = default);
 }

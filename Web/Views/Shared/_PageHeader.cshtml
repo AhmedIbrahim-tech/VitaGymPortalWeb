@@ -1,0 +1,42 @@
+@* 
+    Reusable Page Header Partial
+    Usage: <partial name="_PageHeader" />
+    ViewData options:
+    - PageTitle: Main title (default: "Page")
+    - PageSubtitle: Subtitle text
+    - PageIcon: Bootstrap icon name (default: "file-text")
+    - ShowActionButton: Show action button (default: false)
+    - ActionButtonText: Button text (default: "Add New")
+    - ActionButtonUrl: Button URL (use Url.Action for Razor)
+*@
+@model string
+
+@{
+    var title = ViewData["PageTitle"] as string ?? Model ?? "Page";
+    var subtitle = ViewData["PageSubtitle"] as string ?? "";
+    var icon = ViewData["PageIcon"] as string ?? "file-text";
+    var showActionButton = ViewData["ShowActionButton"] as bool? ?? false;
+    var actionButtonText = ViewData["ActionButtonText"] as string ?? "Add New";
+    var actionButtonUrl = ViewData["ActionButtonUrl"] as string ?? "#";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div class="flex-grow-1">
+        <h1 class="fw-bold text-primary mb-2 d-flex align-items-center gap-2">
+            <i class="bi bi-@(icon) fs-1"></i>
+            <span>@title</span>
+        </h1>
+        @if (!string.IsNullOrEmpty(subtitle))
+        {
+            <p class="text-muted mb-0">@subtitle</p>
+        }
+    </div>
+    @if (showActionButton)
+    {
+        <div class="mt-2 mt-sm-0">
+            <a href="@actionButtonUrl" class="btn btn-primary">
+                @actionButtonText
+            </a>
+        </div>
+    }
+</div>
