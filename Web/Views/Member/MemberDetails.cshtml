@@ -4,111 +4,186 @@
 	ViewData["Title"] = "Member Details";
 }
 
-<!-- Member Details -->
-<div class="container mb-5">
-    <div class="card shadow-lg border border-primary rounded-5 overflow-hidden col-lg-8 m-auto">
-        <div class="card-body p-4 p-md-5">
+<div class="card shadow-sm rounded-4 border-0 bg-white col-lg-10 mx-auto">
+    <div class="card-body p-4 p-md-5">
 
-            <!-- Header -->
-            <div class="row g-4 align-items-center border-bottom pb-4 mb-4">
-                <div class="col-12 col-md-3 text-center">
-					@if (Model.Photo != null)
-					{
-						<img src="~/images/members/@Model.Photo"
-							 alt="Member photo"
-							 class="img-fluid rounded-circle border border-3 border-primary shadow-sm"
-							 style="width: 150px; height: 150px; object-fit: cover;">
-					}
-					else
-					{
-						<img src="~/images/user.png"
-							 alt="Member photo"
-							 class="img-fluid rounded-circle border border-3 border-primary shadow-sm"
-							 style="width: 150px; height: 150px; object-fit: cover;">
-					}
-				</div>
-                <div class="col-12 col-md-9 text-center text-md-start">
-                    <h3 class="fw-bold text-primary mb-1">@Model.Name</h3>
-					<p class="mb-0">Plan: <span class="fw-semibold text-muted">@(Model.PlanName ?? "No Active Plans")</span></p>
-                </div>
+        <!-- Header -->
+        <div class="row g-4 align-items-center border-bottom border-2 border-light pb-4 mb-4">
+            <div class="col-12 col-md-3 text-center">
+                @if (Model.Photo != null)
+                {
+                    <img src="~/images/members/@Model.Photo"
+                         alt="Member photo"
+                         class="img-fluid rounded-circle border border-3 border-primary shadow-lg"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                }
+                else
+                {
+                    <img src="~/images/user.png"
+                         alt="Member photo"
+                         class="img-fluid rounded-circle border border-3 border-primary shadow-lg"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                }
             </div>
-
-            <!-- Basic Info Section -->
-            <div class="mb-4">
-                <h5 class="fw-bold text-secondary border-start border-4 border-primary ps-2 mb-3">
-                    <i class="bi bi-person-circle me-2"></i>Basic Information
-                </h5>
-                <div class="row gy-3">
-                    <div class="col-6 col-md-4">
-                        <p class="mb-1 fw-semibold text-secondary">Gender</p>
-                        <p class="mb-0">@Model.Gender</p>
-                    </div>
-                    <div class="col-6 col-md-8">
-                        <p class="mb-1 fw-semibold text-secondary">Birth Date</p>
-                        <p class="mb-0">@Model.DateOfBirth</p>
-                    </div>
-                </div>
+            <div class="col-12 col-md-9 text-center text-md-start">
+                <h3 class="fw-semibold text-body-emphasis mb-2 lh-base">@Model.Name</h3>
+                <p class="mb-0 text-muted">Plan: <span class="fw-semibold">@(Model.PlanName ?? "No Active Plans")</span></p>
             </div>
-
-            <!-- Contact Info Section -->
-            <div class="mb-4">
-                <h5 class="fw-bold text-secondary border-start border-4 border-success ps-2 mb-3">
-                    <i class="bi bi-envelope-paper me-2"></i>Contact Information
-                </h5>
-                <div class="row gy-3">
-                    <div class="col-12 col-md-4">
-                        <p class="mb-1 fw-semibold text-secondary">Email</p>
-                        <p class="mb-0">@Model.Email</p>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <p class="mb-1 fw-semibold text-secondary">Phone</p>
-                        <p class="mb-0">@Model.Phone</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Membership Info Section -->
-            <div class="mb-4">
-                <h5 class="fw-bold text-secondary border-start border-4 border-info ps-2 mb-3">
-                    <i class="bi bi-calendar-check me-2"></i>Membership Details
-                </h5>
-                <div class="row gy-3">
-                    <div class="col-6 col-md-4">
-                        <p class="mb-1 fw-semibold text-secondary">Start Date</p>
-                        <p class="mb-0">@Model.MembershipStartDate</p>
-                    </div>
-                    <div class="col-6 col-md-6">
-                        <p class="mb-1 fw-semibold text-secondary">End Date</p>
-                        <p class="mb-0">@Model.MembershipEndDate</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Address Info Section -->
-            <div class="mb-4">
-                <h5 class="fw-bold text-secondary border-start border-4 border-warning ps-2 mb-3">
-                    <i class="bi bi-geo-alt me-2"></i>Address
-                </h5>
-                <div class="row gy-3">
-                    <div class="col-6 col-md-4">
-                        <p class="mb-0">@Model.Address</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="d-flex flex-wrap justify-content-end gap-3 pt-3 border-top mt-4">
-				<a class="btn btn-primary d-flex align-items-center gap-2" asp-action="MemberEdit" asp-route-Id="@Model.Id">
-                    <i class="bi bi-pencil-square"></i> Edit
-                </a>
-				<a class="btn btn-danger d-flex align-items-center gap-2" asp-action="Delete" asp-route-Id="@Model.Id">
-                    <i class="bi bi-trash"></i> Delete
-                </a>
-                <a class="btn btn-outline-secondary d-flex align-items-center gap-2" asp-action="Index">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
-            </div>
-
         </div>
+
+        <!-- Basic Info Section -->
+        <partial name="_FormSection" model="@("Basic Information")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "person-circle" }, { "SectionColor", "primary" } }' />
+        <div class="row gy-3 mb-4">
+            <div class="col-6 col-md-4">
+                <p class="mb-1 fw-semibold text-body-emphasis">Gender</p>
+                <p class="mb-0 text-muted">@Model.Gender</p>
+            </div>
+            <div class="col-6 col-md-8">
+                <p class="mb-1 fw-semibold text-body-emphasis">Birth Date</p>
+                <p class="mb-0 text-muted">@Model.DateOfBirth</p>
+            </div>
+        </div>
+
+        <!-- Contact Info Section -->
+        <partial name="_FormSection" model="@("Contact Information")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "envelope-paper" }, { "SectionColor", "success" } }' />
+        <div class="row gy-3 mb-4">
+            <div class="col-12 col-md-4">
+                <p class="mb-1 fw-semibold text-body-emphasis">Email</p>
+                <p class="mb-0 text-muted">@Model.Email</p>
+            </div>
+            <div class="col-12 col-md-6">
+                <p class="mb-1 fw-semibold text-body-emphasis">Phone</p>
+                <p class="mb-0 text-muted">@Model.Phone</p>
+            </div>
+        </div>
+
+        <!-- Membership Info Section -->
+        <partial name="_FormSection" model="@("Membership Details")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "calendar-check" }, { "SectionColor", "info" } }' />
+        <div class="row gy-3 mb-4">
+            <div class="col-6 col-md-4">
+                <p class="mb-1 fw-semibold text-body-emphasis">Start Date</p>
+                <p class="mb-0 text-muted">@Model.MembershipStartDate</p>
+            </div>
+            <div class="col-6 col-md-6">
+                <p class="mb-1 fw-semibold text-body-emphasis">End Date</p>
+                <p class="mb-0 text-muted">@Model.MembershipEndDate</p>
+            </div>
+        </div>
+
+        <!-- Address Info Section -->
+        <partial name="_FormSection" model="@("Address")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "geo-alt" }, { "SectionColor", "warning" } }' />
+        <div class="row gy-3 mb-4">
+            <div class="col-12">
+                <p class="mb-0 text-muted">@Model.Address</p>
+            </div>
+        </div>
+
+        <!-- Health Record Section -->
+        @if (Model.HealthRecordViewModel != null)
+        {
+            var heightInMeters = Model.HealthRecordViewModel.Height / 100m;
+            var bmi = Model.HealthRecordViewModel.Weight / (heightInMeters * heightInMeters);
+            var bmiCategory = bmi < 18.5m ? "Underweight" : bmi < 25m ? "Normal" : bmi < 30m ? "Overweight" : "Obese";
+            var bmiColor = bmi < 18.5m ? "info" : bmi < 25m ? "success" : bmi < 30m ? "warning" : "danger";
+            <partial name="_FormSection" model="@("Health Record")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "heart-pulse" }, { "SectionColor", "danger" } }' />
+            <div class="row g-4 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="card border h-100 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-primary rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-arrows-vertical text-white"></i>
+                                </div>
+                                <h6 class="text-muted mb-0 small">Height</h6>
+                            </div>
+                            <h5 class="text-primary mb-0">@Model.HealthRecordViewModel.Height<small class="fs-6"> cm</small></h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border h-100 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-success rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-speedometer2 text-white"></i>
+                                </div>
+                                <h6 class="text-muted mb-0 small">Weight</h6>
+                            </div>
+                            <h5 class="text-success mb-0">@Model.HealthRecordViewModel.Weight<small class="fs-6"> kg</small></h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border h-100 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-danger rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-droplet text-white"></i>
+                                </div>
+                                <h6 class="text-muted mb-0 small">Blood Type</h6>
+                            </div>
+                            <h5 class="text-danger mb-0">@Model.HealthRecordViewModel.BloodType</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="card border h-100 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-@bmiColor rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="bi bi-activity text-white"></i>
+                                </div>
+                                <h6 class="text-muted mb-0 small">BMI</h6>
+                            </div>
+                            <h5 class="text-@bmiColor mb-0">@bmi.ToString("F1")</h5>
+                            <small class="text-muted">@bmiCategory</small>
+                        </div>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.HealthRecordViewModel.Note))
+                {
+                    <div class="col-12">
+                        <div class="card border shadow-sm">
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="bg-warning rounded-circle p-2 me-2" style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-file-text text-white"></i>
+                                    </div>
+                                    <h6 class="text-muted mb-0">Health Notes</h6>
+                                </div>
+                                <p class="mb-0 text-muted">@Model.HealthRecordViewModel.Note</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <partial name="_FormSection" model="@("Health Record")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "heart-pulse" }, { "SectionColor", "danger" } }' />
+            <div class="alert alert-info mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>No health record available for this member.</span>
+                </div>
+            </div>
+        }
+
+        <!-- Action Buttons -->
+        <div class="d-flex flex-wrap justify-content-end gap-3 pt-4 border-top border-2 border-light mt-5">
+            <a class="btn btn-primary rounded-3 shadow-sm d-flex align-items-center gap-2 px-4" asp-action="MemberEdit" asp-route-Id="@Model.Id">
+                <i class="bi bi-pencil-square"></i>
+                <span>Edit</span>
+            </a>
+            <a class="btn btn-danger rounded-3 shadow-sm d-flex align-items-center gap-2 px-4" asp-action="Delete" asp-route-Id="@Model.Id">
+                <i class="bi bi-trash"></i>
+                <span>Delete</span>
+            </a>
+            <a class="btn btn-outline-secondary rounded-3 shadow-sm d-flex align-items-center gap-2 px-4" asp-action="Index">
+                <i class="bi bi-arrow-left"></i>
+                <span>Back to List</span>
+            </a>
+        </div>
+
     </div>
 </div>

@@ -1,4 +1,8 @@
-using Infrastructure.Entities.Users;
+using Core.ViewModels.MembershipViewModels;
+using Infrastructure.Entities.Attendances;
+using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Sessions;
+using Infrastructure.Entities.Users.GymUsers;
 
 namespace Core.Mappers;
 
@@ -127,30 +131,26 @@ public static class EntityMappers
     {
         return new MemberShipViewModel
         {
+            Id = memberShip.Id,
             MemberId = memberShip.MemberId,
             PlanId = memberShip.PlanId,
             MemberName = memberShip.Member?.Name ?? string.Empty,
             PlanName = memberShip.Plan?.Name ?? string.Empty,
-            StartDate = memberShip.CreatedAt,
-            EndDate = memberShip.EndDate
+            StartDate = memberShip.StartDate,
+            EndDate = memberShip.EndDate,
+            IsActive = memberShip.IsActive
         };
     }
 
-    public static MemberShip ToMemberShip(this CreateMemberShipViewModel viewModel)
+    public static MemberShip ToMemberShip(this CreateMembershipViewModel viewModel)
     {
-        var memberShip = new MemberShip
+        return new MemberShip
         {
             MemberId = viewModel.MemberId,
-            PlanId = viewModel.PlanId
+            PlanId = viewModel.PlanId,
+            StartDate = viewModel.StartDate ?? DateTime.Now,
+            IsActive = true
         };
-        
-        // If StartDate is provided, set CreatedAt (which maps to StartDate in database)
-        if (viewModel.StartDate.HasValue)
-        {
-            memberShip.CreatedAt = viewModel.StartDate.Value;
-        }
-        
-        return memberShip;
     }
 
     #endregion
@@ -159,25 +159,14 @@ public static class EntityMappers
 
     public static AttendanceViewModel ToAttendanceViewModel(this Attendance attendance)
     {
-        var duration = string.Empty;
-        if (attendance.CheckOutTime.HasValue)
-        {
-            var timeSpan = attendance.CheckOutTime.Value - attendance.CheckInTime;
-            duration = $"{timeSpan.Hours}h {timeSpan.Minutes}m";
-        }
-        else
-        {
-            duration = "In Progress";
-        }
-
         return new AttendanceViewModel
         {
             Id = attendance.Id,
             MemberId = attendance.MemberId,
             MemberName = attendance.Member?.Name ?? string.Empty,
             CheckInTime = attendance.CheckInTime,
-            CheckOutTime = attendance.CheckOutTime,
-            Duration = duration
+            CheckOutTime = null,
+            Duration = "N/A"
         };
     }
 
@@ -203,7 +192,7 @@ public static class EntityMappers
             MemberName = payment.Member?.Name ?? string.Empty,
             Amount = payment.Amount,
             PaymentDate = payment.PaymentDate,
-            Method = payment.Method
+            Method = payment.Method.ToString()
         };
     }
 
@@ -213,7 +202,7 @@ public static class EntityMappers
         {
             MemberId = viewModel.MemberId,
             Amount = viewModel.Amount,
-            Method = viewModel.Method,
+            Method = Enum.Parse<PaymentMethod>(viewModel.Method),
             PaymentDate = DateTime.Now
         };
     }

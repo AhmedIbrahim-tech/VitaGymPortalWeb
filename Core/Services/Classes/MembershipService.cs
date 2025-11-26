@@ -1,5 +1,6 @@
 ﻿using Core.Mappers;
-using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Users.GymUsers;
 
 namespace Core.Services.Classes;
 
@@ -7,26 +8,47 @@ public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _m
 {
     #region Create Membership
 
-    public async Task<bool> CreateMembershipAsync(CreateMemberShipViewModel createdMemberShip, CancellationToken cancellationToken = default)
+    public async Task<bool> CreateMembershipAsync(CreateMembershipViewModel createdMemberShip, CancellationToken cancellationToken = default)
     {
         try
         {
-            if (!await IsMemberExistsAsync(createdMemberShip.MemberId, cancellationToken) ||
-                !await IsPlanExistsAsync(createdMemberShip.PlanId, cancellationToken) ||
-                await HasActiveMemberShipAsync(createdMemberShip.MemberId, cancellationToken))
+            // Validate member exists
+            if (!await IsMemberExistsAsync(createdMemberShip.MemberId, cancellationToken))
             {
                 return false;
             }
 
-            var memberShipToCreate = createdMemberShip.ToMemberShip();
+            // Validate plan exists
+            if (!await IsPlanExistsAsync(createdMemberShip.PlanId, cancellationToken))
+            {
+                return false;
+            }
+
+            // Check for active membership
+            if (await HasActiveMemberShipAsync(createdMemberShip.MemberId, cancellationToken))
+            {
+                return false;
+            }
+
+            // Get plan to calculate end date
             var plan = await _unitOfWork.GetRepository<Plan>().GetByIDAsync(createdMemberShip.PlanId, cancellationToken);
-            memberShipToCreate.EndDate = DateTime.Now.AddDays(plan!.DurationDays);
+            if (plan == null)
+            {
+                return false;
+            }
+
+            // Create membership
+            var memberShipToCreate = createdMemberShip.ToMemberShip();
+            var startDate = memberShipToCreate.StartDate;
+            memberShipToCreate.EndDate = startDate.AddDays(plan.DurationDays);
+            memberShipToCreate.IsActive = true;
 
             await _unitOfWork.GetRepository<MemberShip>().AddAsync(memberShipToCreate, cancellationToken);
             return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
         }
-        catch
+        catch (Exception)
         {
+            // Log exception in production
             return false;
         }
     }
@@ -35,19 +57,29 @@ public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _m
 
     #region Delete Membership
 
-    public async Task<bool> DeleteMemberShipAsync(int memberId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteMemberShipAsync(int membershipId, CancellationToken cancellationToken = default)
     {
-        var repo = _unitOfWork.GetRepository<MemberShip>();
-        var memberships = await repo.GetAllAsync(x => x.MemberId == memberId && x.EndDate >= DateTime.Now, cancellationToken);
-        var activeMembership = memberships.FirstOrDefault();
-
-        if (activeMembership is null)
+        try
         {
+            var membership = await _unitOfWork.GetRepository<MemberShip>().GetByIDAsync(membershipId, cancellationToken);
+            
+            if (membership == null)
+            {
+                return false;
+            }
+
+            // Soft delete: Mark as inactive instead of hard delete
+            membership.IsActive = false;
+            membership.UpdatedAt = DateTime.Now;
+            
+            _unitOfWork.GetRepository<MemberShip>().Update(membership);
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
+        }
+        catch (Exception)
+        {
+            // Log exception in production
             return false;
         }
-
-        repo.Delete(activeMembership);
-        return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
     }
 
     #endregion
@@ -57,15 +89,9 @@ public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _m
     public async Task<IEnumerable<MemberShipViewModel>> GetAllMemberShipsAsync(CancellationToken cancellationToken = default)
     {
         var memberShips = await _membershipRepository.GetAllMembershipsWithMemberAndPlanAsync(
-            x => x.EndDate >= DateTime.Now, cancellationToken);
-        var memberShipsList = memberShips.ToList();
-
-        if (!memberShipsList.Any())
-        {
-            return [];
-        }
-
-        return memberShipsList.Select(m => m.ToMemberShipViewModel());
+            x => x.IsActive && x.EndDate >= DateTime.Now, cancellationToken);
+        
+        return memberShips.Select(m => m.ToMemberShipViewModel());
     }
 
     #endregion
@@ -74,7 +100,7 @@ public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _m
 
     public async Task<IEnumerable<PlanSelectListViewModel>> GetPlansForDropDownAsync(CancellationToken cancellationToken = default)
     {
-        var plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync(x => x.IsActive == true, cancellationToken);
+        var plans = await _unitOfWork.GetRepository<Plan>().GetAllAsync(null, cancellationToken);
         return plans.Select(p => p.ToPlanSelectListViewModel());
     }
 

@@ -1,27 +1,23 @@
-﻿using Infrastructure.Entities;
+namespace Infrastructure.Data.Configurations;
 
-namespace Infrastructure.Data.Configurations
+public class MemberShipConfiguration : IEntityTypeConfiguration<MemberShip>
 {
-    public class MemberShipConfiguration : IEntityTypeConfiguration<MemberShip>
+    public void Configure(EntityTypeBuilder<MemberShip> builder)
     {
-        public void Configure(EntityTypeBuilder<MemberShip> builder)
-        {
-            builder.Ignore(b => b.Id);
-            builder.Ignore(b => b.Status);
+        builder.HasOne(ms => ms.Member)
+            .WithMany(m => m.MemberShips)
+            .HasForeignKey(ms => ms.MemberId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.Property(b => b.CreatedAt)
-                .HasColumnName("StartDate")
-                .HasDefaultValueSql("GETDATE()");
+        builder.HasOne(ms => ms.Plan)
+            .WithMany(p => p.MemberShips)
+            .HasForeignKey(ms => ms.PlanId)
+            .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(b => b.Member)
-                .WithMany(s => s.MemberPlans)
-                .HasForeignKey(b => b.MemberId);
-
-            builder.HasOne(b => b.Plan)
-                .WithMany(m => m.PlanMembers)
-                .HasForeignKey(b => b.PlanId);
-
-            builder.HasKey(b => new { b.MemberId, b.PlanId });
-        }
+        builder.ToTable(x => x.HasCheckConstraint(
+            "MemberShip_DateCheck",
+            "StartDate < EndDate"
+        ));
     }
 }
+

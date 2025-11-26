@@ -2,8 +2,9 @@
 
 public enum UserStatus
 {
-    Active =1,
+    Active = 1,
     Inactive,
-    Pending,
-    Blocked
+    Suspended,
+    Blocked,
+    Pending
 }

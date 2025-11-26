@@ -1,4 +1,6 @@
-﻿namespace Web.Controllers;
+﻿using Core.ViewModels.MembershipViewModels;
+
+namespace Web.Controllers;
 
 [Authorize]
 public class MembershipController(IMembershipService _membershipService, IToastNotification _toastNotification) : Controller
@@ -33,30 +35,45 @@ public class MembershipController(IMembershipService _membershipService, IToastN
 
     public async Task<IActionResult> Create(CancellationToken cancellationToken = default)
     {
-        await LoadDropdownsAsync(cancellationToken);
-        return View();
+        var viewModel = await BuildCreateViewModelAsync(cancellationToken);
+        return View(viewModel);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(CreateMemberShipViewModel model, CancellationToken cancellationToken = default)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateMembershipViewModel model, CancellationToken cancellationToken = default)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            var result = await _membershipService.CreateMembershipAsync(model, cancellationToken);
-
-            if (result)
-            {
-                _toastNotification.AddSuccessToastMessage("Membership created successfully!");
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                _toastNotification.AddErrorToastMessage("Failed to create membership. Member already has an active membership.");
-            }
+            var viewModel = await BuildCreateViewModelAsync(cancellationToken);
+            viewModel.PlanId = model.PlanId;
+            viewModel.MemberId = model.MemberId;
+            viewModel.StartDate = model.StartDate;
+            return View(viewModel);
         }
 
-        await LoadDropdownsAsync(cancellationToken);
-        return View(model);
+        var createModel = new CreateMembershipViewModel
+        {
+            PlanId = model.PlanId,
+            MemberId = model.MemberId,
+            StartDate = model.StartDate
+        };
+
+        var result = await _membershipService.CreateMembershipAsync(createModel, cancellationToken);
+
+        if (result)
+        {
+            _toastNotification.AddSuccessToastMessage("Membership created successfully!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        _toastNotification.AddErrorToastMessage("Failed to create membership. Member may already have an active membership or the selected plan/member is invalid.");
+        
+        var errorViewModel = await BuildCreateViewModelAsync(cancellationToken);
+        errorViewModel.PlanId = model.PlanId;
+        errorViewModel.MemberId = model.MemberId;
+        errorViewModel.StartDate = model.StartDate;
+        return View(errorViewModel);
     }
 
     #endregion
@@ -64,8 +81,15 @@ public class MembershipController(IMembershipService _membershipService, IToastN
     #region Cancel Membership
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel(int id, CancellationToken cancellationToken = default)
     {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("Invalid membership ID.");
+            return RedirectToAction(nameof(Index));
+        }
+
         var result = await _membershipService.DeleteMemberShipAsync(id, cancellationToken);
 
         if (result)
@@ -74,7 +98,7 @@ public class MembershipController(IMembershipService _membershipService, IToastN
         }
         else
         {
-            _toastNotification.AddErrorToastMessage("Failed to cancel membership.");
+            _toastNotification.AddErrorToastMessage("Failed to cancel membership. Membership may not exist or is already inactive.");
         }
 
         return RedirectToAction(nameof(Index));
@@ -84,13 +108,16 @@ public class MembershipController(IMembershipService _membershipService, IToastN
 
     #region Helper Methods
 
-    private async Task LoadDropdownsAsync(CancellationToken cancellationToken = default)
+    private async Task<CreateMembershipViewModel> BuildCreateViewModelAsync(CancellationToken cancellationToken = default)
     {
         var members = await _membershipService.GetMembersForDropDownAsync(cancellationToken);
         var plans = await _membershipService.GetPlansForDropDownAsync(cancellationToken);
 
-        ViewBag.members = new SelectList(members, "Id", "Name");
-        ViewBag.plans = new SelectList(plans, "Id", "Name");
+        return new CreateMembershipViewModel
+        {
+            Members = members,
+            Plans = plans
+        };
     }
 
     #endregion

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Users.GymUsers;
 
 namespace Infrastructure.Repositories.Interfaces;
 

@@ -1,4 +1,4 @@
-using Infrastructure.Entities;
+using Infrastructure.Entities.Membership;
 
 namespace Infrastructure.Data.Configurations;
 
@@ -12,14 +12,19 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.PaymentDate)
             .HasDefaultValueSql("GETDATE()");
 
-        builder.Property(p => p.Method)
-            .HasMaxLength(20)
+        builder.Property(p => p.ReferenceNumber)
+            .HasMaxLength(50)
             .HasColumnType("varchar");
 
         builder.HasOne(p => p.Member)
             .WithMany(m => m.Payments)
             .HasForeignKey(p => p.MemberId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(p => p.MemberShip)
+            .WithMany()
+            .HasForeignKey(p => p.MemberShipId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }
 

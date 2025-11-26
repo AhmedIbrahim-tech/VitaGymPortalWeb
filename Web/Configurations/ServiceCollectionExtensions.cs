@@ -1,11 +1,16 @@
-using Infrastructure.Entities.Users;
+using Core.Settings;
+using Infrastructure.Entities.Users.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace Web.Configurations;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        // Configure EmailSettings
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        
         // Repositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ISessionRepository, SessionRepository>();
@@ -25,6 +30,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<IAttachmentService, AttachmentService>();
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IUserManagementService, UserManagementService>();
 
         return services;
     }

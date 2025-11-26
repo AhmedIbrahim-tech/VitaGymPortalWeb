@@ -9,7 +9,22 @@
         <div class="col-md-6">
             <div class="card shadow-lg border rounded-5">
                 <div class="card-header bg-primary-color text-center py-5">
-                    <i class="bi bi-person-badge display-4 mb-3"></i>
+                    <div class="mb-3">
+                        @if (Model.Photo != null)
+                        {
+                            <img src="~/images/trainers/@Model.Photo"
+                                 alt="Trainer photo"
+                                 class="img-fluid rounded-circle border border-3 border-white shadow-lg"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <img src="~/images/user.png"
+                                 alt="Trainer photo"
+                                 class="img-fluid rounded-circle border border-3 border-white shadow-lg"
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                        }
+                    </div>
                     <h2 class="mb-0">@Model.Name</h2>
                     <span class="badge bg-primary mt-2">@Model.specialization Trainer</span>
                 </div>

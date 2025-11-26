@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Repositories.Interfaces;
+﻿using Infrastructure.Entities.Sessions;
+
+namespace Infrastructure.Repositories.Interfaces;
 
 public interface IBookingRepository : IGenericRepository<Booking>
 {

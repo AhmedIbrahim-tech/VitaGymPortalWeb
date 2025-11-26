@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Repositories.Classes;
+﻿using Infrastructure.Entities.Membership;
+
+namespace Infrastructure.Repositories.Classes;
 
 public class MembershipRepository(ApplicationDbContext _context) : GenericRepository<MemberShip>(_context), IMembershipRepository
 {
@@ -10,5 +12,14 @@ public class MembershipRepository(ApplicationDbContext _context) : GenericReposi
 			.AsNoTracking()
 			.Where(predicate)
             .ToListAsync(cancellationToken);
+	}
+
+	public async Task<MemberShip?> GetMembershipByIdWithMemberAndPlanAsync(int id, CancellationToken cancellationToken = default)
+	{
+		return await _context.MemberShips
+			.Include(x => x.Plan)
+			.Include(x => x.Member)
+			.AsNoTracking()
+			.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 	}
 }

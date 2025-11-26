@@ -1,4 +1,4 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Users.Identity;
 
 namespace Web.Controllers;
 
@@ -24,7 +24,16 @@ public class AccountController(IAccountService _accountService, SignInManager<Ap
         var user = await _accountService.ValidateUserAsync(input, cancellationToken);
         if (user == null)
         {
-            ModelState.AddModelError("InvalidLogin", "Email or Password is not Valid");
+            // Check if user exists but is disabled
+            var userByEmail = await _accountService.GetUserByEmailAsync(input.Email);
+            if (userByEmail != null && !userByEmail.IsActive)
+            {
+                ModelState.AddModelError("InvalidLogin", "Your account has been disabled. Please contact the administrator.");
+            }
+            else
+            {
+                ModelState.AddModelError("InvalidLogin", "Email or Password is not Valid");
+            }
             return View(input);
         }
 

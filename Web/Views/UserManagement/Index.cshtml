@@ -1,0 +1,116 @@
+@using Core.ViewModels.UserManagementViewModels
+@model IEnumerable<UserListViewModel>
+
+<partial name="_AlertMessages" />
+
+<partial name="_PageHeader" model="@((string)null)" />
+
+@if (Model != null && Model.Any())
+{
+	<div class="card">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table datatable">
+					<thead class="thead-light">
+						<tr>
+							<th class="no-sort">
+								<label class="checkboxs">
+									<input type="checkbox" id="select-all">
+									<span class="checkmarks"></span>
+								</label>
+							</th>
+							<th>User Name</th>
+							<th>Phone</th>
+							<th>Email</th>
+							<th>Role</th>
+							<th>Status</th>
+							<th class="no-sort"></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var user in Model)
+						{
+							<tr>
+								<td>
+									<label class="checkboxs">
+										<input type="checkbox">
+										<span class="checkmarks"></span>
+									</label>
+								</td>
+								<td>
+									<div class="d-flex align-items-center">
+										<a href="javascript:void(0);" class="avatar avatar-md me-2">
+											@if (!string.IsNullOrEmpty(user.PhotoUrl))
+											{
+												<img src="~/images/users/@user.PhotoUrl" alt="@user.FullName" onerror="this.src='/assets/img/profiles/avator1.jpg'">
+											}
+											else
+											{
+												<img src="~/assets/img/profiles/avator1.jpg" alt="@user.FullName">
+											}
+										</a>
+										<a href="javascript:void(0);">@user.FullName</a>
+									</div>
+								</td>
+								<td>@(user.PhoneNumber ?? "N/A")</td>
+								<td><a href="mailto:@user.Email">@user.Email</a></td>
+								<td>@user.Role</td>
+								<td>
+									@if (user.IsActive)
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-success fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>Active
+										</span>
+									}
+									else
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-danger fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>Inactive
+										</span>
+									}
+								</td>
+								<td class="action-table-data">
+									<div class="edit-delete-action">
+										<a asp-controller="UserManagement" asp-action="Edit" asp-route-id="@user.Id" class="btn btn-icon btn-soft-success rounded-pill" title="Edit">
+											<i data-feather="edit" class="feather-edit"></i>
+										</a>
+										<a asp-controller="UserManagement" asp-action="ChangePassword" asp-route-id="@user.Id" class="btn btn-icon btn-soft-info rounded-pill" title="Change Password">
+											<i data-feather="key" class="feather-edit"></i>
+										</a>
+										<form asp-controller="UserManagement" asp-action="ToggleStatus" asp-route-id="@user.Id" method="post" class="d-inline">
+											<button type="submit" class="btn btn-icon @(user.IsActive ? "btn-soft-info" : "btn-soft-success") rounded-pill" title="@(user.IsActive ? "Deactivate" : "Activate")">
+												<i data-feather="@(user.IsActive ? "x-circle" : "check-circle")" class="feather-edit"></i>
+											</button>
+										</form>
+										<form asp-controller="UserManagement" asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline"
+											  onsubmit="return confirm('Are you sure you want to delete this user?');">
+											<button type="submit" class="btn btn-icon btn-soft-danger rounded-pill" title="Delete">
+												<i data-feather="trash-2" class="feather-trash-2"></i>
+											</button>
+										</form>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<partial name="_EmptyState" />
+}
+
+@section Scripts {
+	<partial name="_AlertBoxScript" />
+	<script>
+		$(document).ready(function () {
+			if (feather) {
+				feather.replace();
+			}
+		});
+	</script>
+}
+

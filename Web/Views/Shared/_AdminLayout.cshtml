@@ -10,14 +10,16 @@
 	</div>
 
 	<!-- Main Wrapper -->
-	<div class="main-wrapper">
+	<div class="main-wrapper bg-light">
 		<partial name="Layout/_Navbar" />
 		<partial name="Layout/_Sidebar" />
 		
 		<!-- Page Wrapper -->
 		<div class="page-wrapper">
-			<div class="content">
-				@RenderBody()
+			<div class="content bg-light min-vh-100 py-4">
+				<div class="container-fluid px-3 px-md-4">
+					@RenderBody()
+				</div>
 			</div>
 		</div>
 	</div>
@@ -27,5 +29,213 @@
 	
 	@await RenderSectionAsync("Scripts", required: false)
 	@await Component.InvokeAsync("NToastNotify")
+
+	<script>
+		// Search functionality
+		(function() {
+			const searchInput = document.getElementById('searchInput');
+			const searchDropdown = document.getElementById('searchDropdown');
+			const searchResults = document.getElementById('searchResults');
+			let searchTimeout;
+
+			if (!searchInput || !searchDropdown || !searchResults) return;
+
+			// Keyboard shortcut (Cmd/Ctrl + K)
+			document.addEventListener('keydown', function(e) {
+				if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+					e.preventDefault();
+					searchInput.focus();
+					const dropdown = bootstrap.Dropdown.getInstance(searchDropdown);
+					if (!dropdown) {
+						new bootstrap.Dropdown(searchDropdown).show();
+					} else {
+						dropdown.show();
+					}
+				}
+			});
+
+			// Search tag links click handler
+			document.querySelectorAll('.search-tag-link').forEach(link => {
+				link.addEventListener('click', function(e) {
+					e.preventDefault();
+					const url = this.getAttribute('data-url');
+					if (url) {
+						window.location.href = url;
+					}
+				});
+			});
+
+			// Search input handler
+			searchInput.addEventListener('input', function() {
+				const query = this.value.trim();
+
+				clearTimeout(searchTimeout);
+
+				if (query.length < 2) {
+					showDefaultResults();
+					return;
+				}
+
+				searchTimeout = setTimeout(() => {
+					performSearch(query);
+				}, 300);
+			});
+
+			// Enter key handler
+			searchInput.addEventListener('keydown', function(e) {
+				if (e.key === 'Enter') {
+					e.preventDefault();
+					const query = this.value.trim();
+					if (query.length >= 2) {
+						performSearch(query);
+					}
+				}
+			});
+
+			async function performSearch(query) {
+				try {
+					searchResults.innerHTML = '<div class="text-center p-3"><div class="spinner-border spinner-border-sm" role="status"></div></div>';
+					
+					const response = await fetch(`@Url.Action("Search", "Search")?query=${encodeURIComponent(query)}`);
+					const data = await response.json();
+
+					if (data.success) {
+						displaySearchResults(data.results, query);
+					} else {
+						showError(data.message || 'Search failed');
+					}
+				} catch (error) {
+					console.error('Search error:', error);
+					showError('An error occurred while searching');
+				}
+			}
+
+			function displaySearchResults(results, query) {
+				let html = '';
+
+				const allResults = [
+					...results.members.map(r => ({ ...r, icon: 'ti-users', color: 'primary' })),
+					...results.trainers.map(r => ({ ...r, icon: 'ti-user-check', color: 'success' })),
+					...results.sessions.map(r => ({ ...r, icon: 'ti-calendar-event', color: 'info' })),
+					...results.memberships.map(r => ({ ...r, icon: 'ti-id', color: 'warning' })),
+					...results.users.map(r => ({ ...r, icon: 'ti-user-plus', color: 'danger' })),
+					...results.plans.map(r => ({ ...r, icon: 'ti-package', color: 'secondary' }))
+				];
+
+				if (allResults.length === 0) {
+					html = `
+						<div class="search-info">
+							<div class="text-center p-3">
+								<i data-feather="search" class="feather-32 mb-2"></i>
+								<p class="mb-0">No results found for "${query}"</p>
+							</div>
+						</div>
+					`;
+				} else {
+					html = '<div class="search-info"><h6><span><i data-feather="search" class="feather-16"></i></span>Search Results</h6><ul class="customers">';
+					
+					allResults.forEach(result => {
+						const displayName = result.name || result.description || 'Unknown';
+						let subtitle = '';
+						
+						// Build subtitle based on result type
+						if (result.type === 'Member' || result.type === 'Trainer') {
+							subtitle = result.email || '';
+						} else if (result.type === 'Session') {
+							subtitle = result.trainerName || result.description || '';
+						} else if (result.type === 'Membership') {
+							subtitle = `Plan: ${result.planName || ''}`;
+						} else if (result.type === 'User') {
+							subtitle = `${result.email || ''} - ${result.role || ''}`.trim();
+						} else if (result.type === 'Plan') {
+							subtitle = result.description || `$${result.price || 0} - ${result.durationDays || 0} days`;
+						}
+						
+						const icon = result.icon || 'ti-file';
+						
+						html += `
+							<li>
+								<a href="${result.url}">
+									<span class="me-2"><i class="ti ${icon} text-${result.color}"></i></span>
+									${displayName}
+									${subtitle ? `<small class="d-block text-muted">${subtitle}</small>` : ''}
+								</a>
+							</li>
+						`;
+					});
+					
+					html += '</ul></div>';
+				}
+
+				searchResults.innerHTML = html;
+				if (typeof feather !== 'undefined') {
+					feather.replace();
+				}
+			}
+
+			function showDefaultResults() {
+				searchResults.innerHTML = `
+					<div class="search-info">
+						<h6>
+							<span><i data-feather="search" class="feather-16"></i></span>Recent Searches
+						</h6>
+						<ul class="search-tags">
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Member")">Members</a></li>
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Trainer")">Trainers</a></li>
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Session")">Sessions</a></li>
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Membership")">Memberships</a></li>
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "UserManagement")">Users</a></li>
+							<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Plan")">Plans</a></li>
+						</ul>
+					</div>
+					<div class="search-info">
+						<h6><span><i data-feather="help-circle" class="feather-16"></i></span>Help</h6>
+						<p>How to add a new member to the system</p>
+						<p>How to schedule a training session</p>
+					</div>
+					<div class="search-info">
+						<h6><span><i data-feather="user" class="feather-16"></i></span>Quick Links</h6>
+						<ul class="customers">
+							<li><a href="@Url.Action("Index", "Member")">Members<img src="~/assets/img/profiles/avator1.jpg" alt="Img" class="img-fluid"></a></li>
+							<li><a href="@Url.Action("Index", "Trainer")">Trainers<img src="~/assets/img/profiles/avatar-01.jpg" alt="Img" class="img-fluid"></a></li>
+							<li><a href="@Url.Action("Index", "Session")">Sessions<img src="~/assets/img/profiles/avatar-10.jpg" alt="Img" class="img-fluid"></a></li>
+							<li><a href="@Url.Action("Index", "Membership")">Memberships<img src="~/assets/img/profiles/avator1.jpg" alt="Img" class="img-fluid"></a></li>
+							<li><a href="@Url.Action("Index", "UserManagement")">Users<img src="~/assets/img/profiles/avatar-01.jpg" alt="Img" class="img-fluid"></a></li>
+							<li><a href="@Url.Action("Index", "Plan")">Plans<img src="~/assets/img/profiles/avatar-10.jpg" alt="Img" class="img-fluid"></a></li>
+						</ul>
+					</div>
+				`;
+				
+				// Re-attach event listeners
+				document.querySelectorAll('.search-tag-link').forEach(link => {
+					link.addEventListener('click', function(e) {
+						e.preventDefault();
+						const url = this.getAttribute('data-url');
+						if (url) {
+							window.location.href = url;
+						}
+					});
+				});
+				
+				if (typeof feather !== 'undefined') {
+					feather.replace();
+				}
+			}
+
+			function showError(message) {
+				searchResults.innerHTML = `
+					<div class="search-info">
+						<div class="text-center p-3 text-danger">
+							<i data-feather="alert-circle" class="feather-32 mb-2"></i>
+							<p class="mb-0">${message}</p>
+						</div>
+					</div>
+				`;
+				if (typeof feather !== 'undefined') {
+					feather.replace();
+				}
+			}
+		})();
+	</script>
 </body>
 </html>

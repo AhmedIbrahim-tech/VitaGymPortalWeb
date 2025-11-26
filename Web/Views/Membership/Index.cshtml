@@ -7,51 +7,117 @@
 
 @if (Model != null && Model.Any())
 {
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>Plan</th>
-                            <th class="d-none d-md-table-cell">Start Date</th>
-                            <th class="d-none d-md-table-cell">End Date</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="fw-bold">@item.MemberName</td>
-                                <td>
-                                    <div class="d-flex flex-column gap-1">
-                                        <span class="fw-semibold">@item.PlanName</span>
-                                        <span class="d-md-none text-muted small">from: @item.StartDate.ToString("MMM dd, yyyy")</span>
-                                        <span class="d-md-none text-muted small">to: @item.EndDate.ToString("MMM dd, yyyy")</span>
-                                    </div>
-                                </td>
-                                <td class="d-none d-md-table-cell">@item.StartDate.ToString("MMM dd, yyyy")</td>
-                                <td class="d-none d-md-table-cell">@item.EndDate.ToString("MMM dd, yyyy")</td>
-                                <td class="text-center">
-                                    <form method="post" asp-action="Cancel" class="d-inline">
-                                        <input type="hidden" name="id" value="@item.MemberId" />
-                                        <button type="submit" class="btn btn-sm btn-danger d-flex align-items-center gap-1" 
-                                                onclick="return confirm('Are you sure you want to cancel this membership?');">
-                                            <i class="bi bi-x-circle"></i> Cancel
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+	<div class="card shadow-sm border-0">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table datatable table-hover">
+					<thead class="thead-light">
+						<tr>
+							<th class="no-sort">
+								<label class="checkboxs">
+									<input type="checkbox" id="select-all">
+									<span class="checkmarks"></span>
+								</label>
+							</th>
+							<th>Member</th>
+							<th>Plan</th>
+							<th class="d-none d-md-table-cell">Start Date</th>
+							<th class="d-none d-md-table-cell">End Date</th>
+							<th>Status</th>
+							<th class="no-sort text-end">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var item in Model)
+						{
+							var statusClass = item.IsExpiringSoon ? "warning" : "success";
+							var statusText = item.IsExpiringSoon ? $"Expires in {item.RemainingDays} days" : "Active";
+							var statusIcon = item.IsExpiringSoon ? "alert-circle" : "check-circle";
+							
+							<tr>
+								<td>
+									<label class="checkboxs">
+										<input type="checkbox" value="@item.Id">
+										<span class="checkmarks"></span>
+									</label>
+								</td>
+								<td>
+									<div class="d-flex align-items-center">
+										<div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
+											<span class="text-primary fw-semibold">@(!string.IsNullOrEmpty(item.MemberName) ? item.MemberName.Substring(0, 1).ToUpper() : "?")</span>
+										</div>
+										<span class="fw-medium">@item.MemberName</span>
+									</div>
+								</td>
+								<td>
+									<div class="d-flex flex-column gap-1">
+										<span class="fw-medium">@item.PlanName</span>
+										<span class="d-md-none text-muted small">
+											<i class="bi bi-calendar3 me-1"></i>@item.StartDate.ToString("MMM dd, yyyy") - @item.EndDate.ToString("MMM dd, yyyy")
+										</span>
+									</div>
+								</td>
+								<td class="d-none d-md-table-cell">
+									<div class="d-flex align-items-center text-muted">
+										<i class="bi bi-calendar-event me-2"></i>
+										<span>@item.StartDate.ToString("MMM dd, yyyy")</span>
+									</div>
+								</td>
+								<td class="d-none d-md-table-cell">
+									<div class="d-flex align-items-center text-muted">
+										<i class="bi bi-calendar-check me-2"></i>
+										<span>@item.EndDate.ToString("MMM dd, yyyy")</span>
+									</div>
+								</td>
+								<td>
+									<span class="badge bg-@statusClass-subtle text-@statusClass d-inline-flex align-items-center gap-1">
+										<i class="bi bi-@statusIcon"></i>
+										<span>@statusText</span>
+									</span>
+									@if (item.RemainingDays > 0 && item.RemainingDays <= 30)
+									{
+										<div class="text-muted small mt-1">
+											@item.RemainingDays day(s) remaining
+										</div>
+									}
+								</td>
+								<td class="action-table-data text-end">
+									<div class="d-flex justify-content-end gap-2">
+										<form method="post" asp-controller="Membership" asp-action="Cancel" class="d-inline" 
+											  onsubmit="return confirm('Are you sure you want to cancel this membership? This action cannot be undone.');">
+											<input type="hidden" name="id" value="@item.Id" />
+											<button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" 
+													title="Cancel Membership">
+												<i class="bi bi-x-circle me-1"></i>Cancel
+											</button>
+										</form>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 }
 else
 {
-    <partial name="_EmptyState" model="@((string)null)" />
+	<partial name="_EmptyState" />
+}
+
+@section Scripts {
+	<partial name="_AlertBoxScript" />
+	<script>
+		$(document).ready(function () {
+			if (feather) {
+				feather.replace();
+			}
+			
+			// Select all checkbox functionality
+			$('#select-all').on('change', function() {
+				$('tbody input[type="checkbox"]').prop('checked', this.checked);
+			});
+		});
+	</script>
 }

@@ -1,4 +1,4 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Users.Identity;
 
 namespace Core.Services.Classes;
 
@@ -14,8 +14,19 @@ public class AccountService(UserManager<ApplicationUser> _userManager) : IAccoun
             return null;
         }
 
+        // Check if user is active
+        if (!user.IsActive)
+        {
+            return null;
+        }
+
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, input.Password);
         return isPasswordValid ? user : null;
+    }
+
+    public async Task<ApplicationUser?> GetUserByEmailAsync(string email)
+    {
+        return await _userManager.FindByEmailAsync(email);
     }
 
     #endregion

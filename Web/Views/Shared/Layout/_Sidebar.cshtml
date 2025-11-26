@@ -1,6 +1,11 @@
+@using Microsoft.AspNetCore.Mvc.ViewComponents
 @{
 	var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
-	var userName = User.Identity?.Name ?? "Admin";
+	var userInfo = await Component.InvokeAsync("UserInfo");
+	var userInfoModel = (userInfo as ViewViewComponentResult)?.ViewData?.Model as Core.ViewModels.UserManagementViewModels.CurrentUserViewModel;
+	var userName = userInfoModel?.FullName ?? "Admin";
+	var userRole = userInfoModel?.Role ?? "Admin";
+	var userPhoto = userInfoModel?.PhotoUrl ?? "/assets/img/customer/customer15.jpg";
 }
 
 <!-- Sidebar -->
@@ -24,10 +29,10 @@
 	<div class="modern-profile p-3 pb-0">
 		<div class="text-center rounded bg-light p-3 mb-4 user-profile">
 			<div class="avatar avatar-lg online mb-3">
-				<img src="~/assets/img/customer/customer15.jpg" alt="Img" class="img-fluid rounded-circle">
+				<img src="@userPhoto" alt="Img" class="img-fluid rounded-circle" onerror="this.src='/assets/img/customer/customer15.jpg'">
 			</div>
 			<h6 class="fs-14 fw-bold mb-1">@userName</h6>
-			<p class="fs-12 mb-0">System Admin</p>
+			<p class="fs-12 mb-0">@userRole</p>
 		</div>
 		<div class="sidebar-nav mb-3">
 			<ul class="nav nav-tabs nav-tabs-solid nav-tabs-rounded nav-justified bg-transparent" role="tablist">
@@ -38,11 +43,11 @@
 	<div class="sidebar-header p-3 pb-0 pt-2">
 		<div class="text-center rounded bg-light p-2 mb-4 sidebar-profile d-flex align-items-center">
 			<div class="avatar avatar-md onlin">
-				<img src="~/assets/img/customer/customer15.jpg" alt="Img" class="img-fluid rounded-circle">
+				<img src="@userPhoto" alt="Img" class="img-fluid rounded-circle" onerror="this.src='/assets/img/customer/customer15.jpg'">
 			</div>
 			<div class="text-start sidebar-profile-info ms-2">
 				<h6 class="fs-14 fw-bold mb-1">@userName</h6>
-				<p class="fs-12">System Admin</p>
+				<p class="fs-12">@userRole</p>
 			</div>
 		</div>
 		<div class="d-flex align-items-center justify-content-between menu-item mb-3">
@@ -84,6 +89,17 @@
 						</li>
 						<li>
 							<a href="@Url.Action("Index", "Booking")" class="@(currentController == "Booking" ? "active" : "")"><i class="ti ti-calendar-check fs-16 me-2"></i><span>Bookings</span></a>
+						</li>
+					</ul>
+				</li>
+				<li class="submenu-open">
+					<h6 class="submenu-hdr">System</h6>
+					<ul>
+						<li>
+							<a href="@Url.Action("Index", "UserManagement")" class="@(currentController == "UserManagement" ? "active" : "")"><i class="ti ti-users fs-16 me-2"></i><span>User Management</span></a>
+						</li>
+						<li>
+							<a href="@Url.Action("Index", "RolesPermissions")" class="@(currentController == "RolesPermissions" ? "active" : "")"><i class="ti ti-shield fs-16 me-2"></i><span>Roles & Permissions</span></a>
 						</li>
 					</ul>
 				</li>

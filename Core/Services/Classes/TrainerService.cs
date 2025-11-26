@@ -1,8 +1,11 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Sessions;
+using Infrastructure.Entities.Users.GymUsers;
+using Infrastructure.Entities.Shared;
+using Core.Services.AttachmentService;
 
 namespace Core.Services.Classes;
 
-public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
+public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachmentService) : ITrainerService
 {
     #region Create Trainer
 
@@ -14,6 +17,16 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
                 await IsPhoneExistAsync(trainerViewModel.Phone, cancellationToken))
             {
                 return false;
+            }
+
+            string? photoUrl = null;
+            if (trainerViewModel.PhotoFile != null && trainerViewModel.PhotoFile.Length > 0)
+            {
+                photoUrl = _attachmentService.Upload("trainers", trainerViewModel.PhotoFile);
+                if (string.IsNullOrEmpty(photoUrl))
+                {
+                    return false;
+                }
             }
 
             var trainer = new Trainer
@@ -29,12 +42,20 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
                     BuildingNumber = trainerViewModel.BuildingNumber
                 },
                 Gender = trainerViewModel.Gender,
-                Speciality = trainerViewModel.Specialization
+                Speciality = trainerViewModel.Specialization,
+                PhotoUrl = photoUrl
             };
 
             await _unitOfWork.GetRepository<Trainer>().AddAsync(trainer, cancellationToken);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            return true;
+            var result = await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
+
+            if (!result && !string.IsNullOrEmpty(photoUrl))
+            {
+                _attachmentService.Delete(photoUrl, "trainers");
+                return false;
+            }
+
+            return result;
         }
         catch (Exception)
         {
@@ -64,7 +85,8 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
             DateOfBirth = t.DateOfBirth.ToShortDateString(),
             Phone = t.Phone,
             Gender = t.Gender.ToString(),
-            specialization = t.Speciality?.ToString() ?? "N/A"
+            specialization = t.Speciality?.ToString() ?? "N/A",
+            Photo = t.PhotoUrl
         });
     }
 
@@ -89,7 +111,8 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
             Phone = trainer.Phone,
             Gender = trainer.Gender.ToString(),
             Address = FormatAddress(trainer.Address),
-            specialization = trainer.Speciality?.ToString() ?? "N/A"
+            specialization = trainer.Speciality?.ToString() ?? "N/A",
+            Photo = trainer.PhotoUrl
         };
     }
 
@@ -116,6 +139,25 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
         if (emailExists || phoneExists)
         {
             return false;
+        }
+
+        if (trainerViewModel.PhotoFile != null && trainerViewModel.PhotoFile.Length > 0)
+        {
+            var uploadedPhoto = _attachmentService.Upload("trainers", trainerViewModel.PhotoFile);
+
+            if (uploadedPhoto != null)
+            {
+                if (!string.IsNullOrEmpty(trainer.PhotoUrl))
+                {
+                    _attachmentService.Delete(trainer.PhotoUrl, "trainers");
+                }
+
+                trainer.PhotoUrl = uploadedPhoto;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         trainer.Name = trainerViewModel.Name;
@@ -158,7 +200,9 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
             BuildingNumber = trainer.Address?.BuildingNumber ?? string.Empty,
             Street = trainer.Address?.Street ?? string.Empty,
             City = trainer.Address?.City ?? string.Empty,
-            DateOfBirth = trainer.DateOfBirth
+            DateOfBirth = trainer.DateOfBirth,
+            Gender = trainer.Gender,
+            CurrentPhotoUrl = trainer.PhotoUrl
         };
     }
 
@@ -183,6 +227,11 @@ public class TrainerService(IUnitOfWork _unitOfWork) : ITrainerService
 
         try
         {
+            if (!string.IsNullOrEmpty(trainer.PhotoUrl))
+            {
+                _attachmentService.Delete(trainer.PhotoUrl, "trainers");
+            }
+
             _unitOfWork.GetRepository<Trainer>().Delete(trainer);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return true;

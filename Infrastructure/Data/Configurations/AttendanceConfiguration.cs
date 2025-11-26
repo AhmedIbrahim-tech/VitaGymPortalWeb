@@ -1,5 +1,3 @@
-using Infrastructure.Entities;
-
 namespace Infrastructure.Data.Configurations;
 
 public class AttendanceConfiguration : IEntityTypeConfiguration<Attendance>

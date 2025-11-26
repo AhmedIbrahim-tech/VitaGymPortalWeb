@@ -4,83 +4,109 @@
 	ViewData["Title"] = "Edit Member";
 }
 
-<div class="container mb-5">
-	<div class="row justify-content-center">
-		<div class="col-lg-8">
-			<div class="card shadow-lg border-primary rounded-4">
-				<div class="card-body p-4 p-md-5">
-					<div class="text-center mb-4">
-						@if(Model.Photo != null)
-						{
-							<img src="~/images/members/@Model.Photo" alt="@Model.Name" class="rounded-circle border border-3 border-primary shadow-sm"
-								 style="width: 120px; height: 120px; object-fit: cover;" />
-						}
-						else
-						{
-							<img src="~/images/user.png" alt="@Model.Name" class="rounded-circle border border-3 border-primary shadow-sm"
-								 style="width: 120px; height: 120px; object-fit: cover;" />
-						}
-						<h3 class="mt-3 mb-1 text-primary">@Model.Name</h3>
-						<p class="text-muted">Edit member information</p>
-					</div>
-					<form asp-controller="Member" asp-action="MemberEdit" method="post" enctype="multipart/form-data" novalidate>
-						<input asp-for="Photo" type="hidden" />
-						<input asp-for="Name" type="hidden" />
-
-						<div class="row g-3">
-							<div class="col-12">
-								<label asp-for="PhotoFile" class="form-label fw-semibold">Profile Photo</label>
-								<div class="mb-2">
-									<img id="photoPreview" src="@(Model.Photo != null ? $"~/images/members/{Model.Photo}" : "~/images/user.png")" 
-										 alt="Photo Preview" 
-										 style="max-width: 150px; max-height: 150px;" 
-										 class="rounded-circle border border-2 border-primary" />
-								</div>
-								<input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" id="photoInput"/>
-								<span asp-validation-for="PhotoFile" class="text-danger"></span>
-								<small class="form-text text-muted">Max size: 5 MB. Allowed types: JPG, PNG, JPEG. Leave empty to keep current photo.</small>
-							</div>
-							<div class="col-12">
-								<label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
-								<input asp-for="Email" class="form-control" />
-								<span asp-validation-for="Email" class="text-danger"></span>
-							</div>
-							<div class="col-md-6">
-								<label asp-for="Phone" class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
-								<input asp-for="Phone" class="form-control" />
-								<span asp-validation-for="Phone" class="text-danger"></span>
-							</div>
-							<div class="col-md-6">
-								<label asp-for="BuildingNumber" class="form-label fw-semibold">Building Number</label>
-								<input asp-for="BuildingNumber" class="form-control" />
-								<span asp-validation-for="BuildingNumber" class="text-danger"></span>
-							</div>
-							<div class="col-md-6">
-								<label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
-								<input asp-for="City" class="form-control" />
-								<span asp-validation-for="City" class="text-danger"></span>
-							</div>
-							<div class="col-md-6">
-								<label asp-for="Street" class="form-label fw-semibold">Street <span class="text-danger">*</span></label>
-								<input asp-for="Street" class="form-control" />
-								<span asp-validation-for="Street" class="text-danger"></span>
-							</div>
-						</div>
-
-						<div class="d-flex justify-content-between gap-3 border-top pt-4 mt-4">
-							<a asp-controller="Member" asp-action="Index" class="btn btn-outline-secondary d-flex align-items-center gap-2">
-								<i class="bi bi-arrow-left"></i> Back to List
-							</a>
-							<button type="submit" class="btn btn-primary d-flex align-items-center gap-2">
-								<i class="bi bi-check-lg"></i> Update Member
-							</button>
-						</div>
-						</form>
-					</div>
-				</div>
-
-			</div>
+<div class="card shadow-sm rounded-4 border-0 bg-white col-lg-10 mx-auto">
+	<div class="card-body p-4 p-md-5">
+			<div class="text-center mb-4 pb-3 border-bottom border-2 border-light">
+			@if(Model.Photo != null)
+			{
+				<img src="@Url.Content($"~/images/members/{Model.Photo}")" alt="@Model.Name" class="rounded-circle border border-3 border-primary shadow-lg"
+					 style="width: 120px; height: 120px; object-fit: cover;" onerror="this.src='@Url.Content("~/images/user.png")'" />
+			}
+			else
+			{
+				<img src="@Url.Content("~/images/user.png")" alt="@Model.Name" class="rounded-circle border border-3 border-primary shadow-lg"
+					 style="width: 120px; height: 120px; object-fit: cover;" />
+			}
+			<h3 class="mt-3 mb-1 fw-semibold text-body-emphasis lh-base">@Model.Name</h3>
+			<p class="text-muted mb-0">Edit member information</p>
 		</div>
+		<form asp-controller="Member" asp-action="MemberEdit" method="post" enctype="multipart/form-data" novalidate>
+			<input asp-for="Photo" type="hidden" />
+			<input asp-for="Name" type="hidden" />
+
+			<!-- Personal Information Section -->
+			<partial name="_FormSection" model="@("Personal Information")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "person-circle" }, { "SectionColor", "primary" } }' />
+			<div class="row g-4">
+				<div class="col-12">
+					<label asp-for="PhotoFile" class="form-label fw-semibold">Profile Photo</label>
+					<div class="mb-3">
+						<img id="photoPreview" src="@(Model.Photo != null ? Url.Content($"~/images/members/{Model.Photo}") : Url.Content("~/images/user.png"))" 
+							 alt="Photo Preview" 
+							 style="max-width: 150px; max-height: 150px;" 
+							 class="rounded-circle border border-3 border-primary shadow-sm" />
+					</div>
+					<input asp-for="PhotoFile" type="file" class="form-control form-control-lg rounded-3" accept="image/*" id="photoInput"/>
+					<span asp-validation-for="PhotoFile" class="text-danger small"></span>
+					<small class="form-text text-muted">Max size: 5 MB. Allowed types: JPG, PNG, JPEG. Leave empty to keep current photo.</small>
+				</div>
+				<div class="col-12">
+					<label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+					<input asp-for="Email" class="form-control form-control-lg rounded-3" />
+					<span asp-validation-for="Email" class="text-danger small"></span>
+				</div>
+				<div class="col-md-6">
+					<label asp-for="Phone" class="form-label fw-semibold">Phone <span class="text-danger">*</span></label>
+					<input asp-for="Phone" class="form-control form-control-lg rounded-3" />
+					<span asp-validation-for="Phone" class="text-danger small"></span>
+				</div>
+			</div>
+
+			<!-- Address Information Section -->
+			<partial name="_FormSection" model="@("Address Information")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "geo-alt" }, { "SectionColor", "success" } }' />
+			<div class="row g-4">
+				<div class="col-md-4">
+					<label asp-for="BuildingNumber" class="form-label fw-semibold">Building Number</label>
+					<input asp-for="BuildingNumber" class="form-control form-control-lg rounded-3" />
+					<span asp-validation-for="BuildingNumber" class="text-danger small"></span>
+				</div>
+				<div class="col-md-4">
+					<label asp-for="Street" class="form-label fw-semibold">Street <span class="text-danger">*</span></label>
+					<input asp-for="Street" class="form-control form-control-lg rounded-3" />
+					<span asp-validation-for="Street" class="text-danger small"></span>
+				</div>
+				<div class="col-md-4">
+					<label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+					<input asp-for="City" class="form-control form-control-lg rounded-3" />
+					<span asp-validation-for="City" class="text-danger small"></span>
+				</div>
+			</div>
+
+			<!-- Health Record Section -->
+			<partial name="_FormSection" model="@("Health Record")" view-data='new ViewDataDictionary(ViewData) { { "SectionIcon", "heart-pulse" }, { "SectionColor", "danger" } }' />
+			<div class="row g-4">
+				<div class="col-md-3">
+					<label asp-for="HealthRecordViewModel.Height" class="form-label fw-semibold">Height (cm) <span class="text-danger">*</span></label>
+					<input asp-for="HealthRecordViewModel.Height" type="number" step="0.01" class="form-control form-control-lg rounded-3" placeholder="e.g. 175" />
+					<span asp-validation-for="HealthRecordViewModel.Height" class="text-danger small"></span>
+				</div>
+				<div class="col-md-3">
+					<label asp-for="HealthRecordViewModel.Weight" class="form-label fw-semibold">Weight (kg) <span class="text-danger">*</span></label>
+					<input asp-for="HealthRecordViewModel.Weight" type="number" step="0.01" class="form-control form-control-lg rounded-3" placeholder="e.g. 70" />
+					<span asp-validation-for="HealthRecordViewModel.Weight" class="text-danger small"></span>
+				</div>
+				<div class="col-md-3">
+					<label asp-for="HealthRecordViewModel.BloodType" class="form-label fw-semibold">Blood Type <span class="text-danger">*</span></label>
+					<select asp-for="HealthRecordViewModel.BloodType" class="form-select form-select-lg rounded-3">
+						<option value="">Select type</option>
+						<option>A+</option>
+						<option>A-</option>
+						<option>B+</option>
+						<option>B-</option>
+						<option>AB+</option>
+						<option>AB-</option>
+						<option>O+</option>
+						<option>O-</option>
+					</select>
+					<span asp-validation-for="HealthRecordViewModel.BloodType" class="text-danger small"></span>
+				</div>
+				<div class="col-md-12">
+					<label asp-for="HealthRecordViewModel.Note" class="form-label fw-semibold">Health Notes</label>
+					<textarea asp-for="HealthRecordViewModel.Note" class="form-control rounded-3" rows="3" placeholder="Add any relevant health notes..."></textarea>
+				</div>
+			</div>
+
+			<partial name="_ActionButtons" view-data='new ViewDataDictionary(ViewData) { { "CancelUrl", Url.Action("Index", "Member") }, { "CancelText", "Back to List" }, { "SubmitText", "Update Member" }, { "SubmitIcon", "check-lg" } }' />
+		</form>
 	</div>
 </div>
 

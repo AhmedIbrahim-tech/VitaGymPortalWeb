@@ -1,15 +1,29 @@
-﻿using Infrastructure.Entities;
+namespace Infrastructure.Data.Configurations;
 
-namespace Infrastructure.Data.Configurations
+public class HealthRecordConfiguration : IEntityTypeConfiguration<HealthRecord>
 {
-    public class HealthRecordConfiguration : IEntityTypeConfiguration<HealthRecord>
+    public void Configure(EntityTypeBuilder<HealthRecord> builder)
     {
-        public void Configure(EntityTypeBuilder<HealthRecord> builder)
-        {
-            builder.Ignore(hr=>hr.CreatedAt);
-            builder.Ignore(hr => hr.UpdatedAt);
+        builder.Property(h => h.Height)
+            .HasPrecision(5, 2);
 
-        }
+        builder.Property(h => h.Weight)
+            .HasPrecision(5, 2);
+
+        builder.Property(h => h.BloodType)
+            .HasMaxLength(10)
+            .HasColumnType("varchar");
+
+        builder.Property(h => h.Note)
+            .HasMaxLength(500)
+            .HasColumnType("varchar");
+
+        builder.Property(h => h.PhotoUrl)
+            .HasMaxLength(500)
+            .HasColumnType("varchar");
+
+        builder.HasIndex(h => h.MemberId)
+            .IsUnique();
     }
-   
 }
+

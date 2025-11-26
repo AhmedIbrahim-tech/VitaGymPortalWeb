@@ -1,20 +1,16 @@
-﻿using Infrastructure.Entities.Users;
+namespace Infrastructure.Data.Configurations;
 
-namespace Infrastructure.Data.Configurations
+public class MemberConfiguration : GymUserConfiguration<Member>, IEntityTypeConfiguration<Member>
 {
-    public class MemberConfiguration : GymUserConfiguration<Member>,IEntityTypeConfiguration<Member>
+    public new void Configure(EntityTypeBuilder<Member> builder)
     {
-        public new void Configure(EntityTypeBuilder<Member> builder)
-        {
-            builder.Property(m => m.CreatedAt)
-                .HasColumnName("JoinDate")
-                .HasDefaultValueSql("GETDATE()");
+        // Configure 1:1 relationship with HealthRecord
+        builder.HasOne(m => m.HealthRecord)
+            .WithOne(h => h.Member)
+            .HasForeignKey<HealthRecord>(h => h.MemberId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(m => m.HealthRecord)
-                .WithOne()
-                .HasForeignKey<HealthRecord>(hr => hr.Id);
-            base.Configure(builder);
-        }
+        base.Configure(builder);
     }
-   
 }
+

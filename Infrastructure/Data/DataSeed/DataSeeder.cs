@@ -1,4 +1,7 @@
-using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Sessions;
+using Infrastructure.Entities.Users.GymUsers;
+using Infrastructure.Entities.Shared;
 
 namespace Infrastructure.Data.DataSeed;
 
@@ -28,7 +31,6 @@ public static class DataSeeder
                     .RuleFor(p => p.Description, f => f.Lorem.Sentence())
                     .RuleFor(p => p.Price, f => f.Finance.Amount(50, 500, 2))
                     .RuleFor(p => p.DurationDays, f => f.Random.Int(30, 365))
-                    .RuleFor(p => p.IsActive, f => f.Random.Bool(0.8f))
                     .RuleFor(p => p.CreatedAt, f => f.Date.Past(1));
 
                 var plans = planFaker.Generate(3);
@@ -45,7 +47,7 @@ public static class DataSeeder
                     .RuleFor(t => t.Phone, f => GenerateEgyptianPhoneNumber(f))
                     .RuleFor(t => t.DateOfBirth, f => f.Date.Between(DateTime.Now.AddYears(-50), DateTime.Now.AddYears(-25)))
                     .RuleFor(t => t.Gender, f => f.PickRandom<Gender>())
-                    .RuleFor(t => t.Speciality, f => f.PickRandom<Speicalites>())
+                    .RuleFor(t => t.Speciality, f => f.PickRandom<Specialities>())
                     .RuleFor(t => t.Address, f => new Address
                     {
                         Street = f.Address.StreetAddress().Length > 30 ? f.Address.StreetAddress().Substring(0, 30) : f.Address.StreetAddress(),
@@ -68,7 +70,7 @@ public static class DataSeeder
                     .RuleFor(m => m.Phone, f => GenerateEgyptianPhoneNumber(f))
                     .RuleFor(m => m.DateOfBirth, f => f.Date.Between(DateTime.Now.AddYears(-60), DateTime.Now.AddYears(-18)))
                     .RuleFor(m => m.Gender, f => f.PickRandom<Gender>())
-                    .RuleFor(m => m.Photo, f => $"members/{f.System.FileName("jpg")}")
+                    .RuleFor(m => m.PhotoUrl, f => $"members/{f.System.FileName("jpg")}")
                     .RuleFor(m => m.Address, f => new Address
                     {
                         Street = f.Address.StreetAddress().Length > 30 ? f.Address.StreetAddress().Substring(0, 30) : f.Address.StreetAddress(),
@@ -79,25 +81,6 @@ public static class DataSeeder
 
                 var members = memberFaker.Generate(10);
                 await context.Members.AddRangeAsync(members);
-                await context.SaveChangesAsync();
-
-                // Seed HealthRecords (one-to-one with Members, using same Id)
-                var healthRecordFaker = new Faker<HealthRecord>()
-                    .RuleFor(hr => hr.Height, f => f.Random.Decimal(150, 200))
-                    .RuleFor(hr => hr.Weight, f => f.Random.Decimal(50, 120))
-                    .RuleFor(hr => hr.BloodType, f => f.PickRandom("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"))
-                    .RuleFor(hr => hr.Note, f => f.Random.Bool(0.3f) ? f.Lorem.Sentence() : null)
-                    .RuleFor(hr => hr.CreatedAt, f => f.Date.Past(1));
-
-                var healthRecords = new List<HealthRecord>();
-                foreach (var member in members)
-                {
-                    var healthRecord = healthRecordFaker.Generate();
-                    healthRecord.Id = member.Id; // One-to-one relationship using same Id
-                    healthRecords.Add(healthRecord);
-                }
-
-                await context.HealthRecords.AddRangeAsync(healthRecords);
                 await context.SaveChangesAsync();
             }
 
@@ -192,7 +175,7 @@ public static class DataSeeder
 
             return true;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return false;
         }

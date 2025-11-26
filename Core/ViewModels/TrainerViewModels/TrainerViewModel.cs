@@ -10,4 +10,5 @@ public class TrainerViewModel
     public string Gender { get; set; } = null!;
     public string? Address { get; set; } = null;
     public string specialization { get; set; } = null!;
+    public string? Photo { get; set; }
 }

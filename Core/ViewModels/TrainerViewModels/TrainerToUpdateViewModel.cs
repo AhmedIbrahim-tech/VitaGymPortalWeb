@@ -1,4 +1,6 @@
-﻿namespace Core.ViewModels.TrainerViewModels;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Core.ViewModels.TrainerViewModels;
 
 public class TrainerToUpdateViewModel
 {
@@ -10,5 +12,7 @@ public class TrainerToUpdateViewModel
     public string Street { get; set; } = null!;
     public string City { get; set; } = null!;
     public string BuildingNumber { get; set; } = null!;
-    public Speicalites? Specialization { get; set; }
+    public Specialities? Specialization { get; set; }
+    public IFormFile? PhotoFile { get; set; }
+    public string? CurrentPhotoUrl { get; set; }
 }

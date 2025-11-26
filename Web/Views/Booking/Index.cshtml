@@ -3,130 +3,106 @@
 
 <partial name="_AlertMessages" />
 
-<div class="container-fluid">
-    @if (Model != null && Model.Any())
-    {
-        <div class="mb-5">
-            <h2 class="text-primary fw-bold mb-2 d-flex align-items-center gap-2">
-                <i class="bi bi-calendar-event fs-1"></i>
-                <span>Upcoming Sessions</span>
-            </h2>
-            <p class="text-muted">Sessions available for booking</p>
-        </div>
+<partial name="_PageHeader" model="@((string)null)" />
 
-            <div class="row g-4 ">
-                @foreach (var session in Model.Where(X => X.Status == "Upcoming"))
-                {
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm session-card rounded-4">
-                            <div class="card-header text-white py-3 bg-primary rounded-top-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-calendar-event me-2"></i>@session.CategoryName
-                                    </h5>
-                                    <span class="badge bg-light text-dark">@session.Status</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted mb-3">@session.Description</p>
+@if (Model != null && Model.Any())
+{
+	<div class="card">
+		<div class="card-body p-0">
+			<div class="table-responsive">
+				<table class="table datatable">
+					<thead class="thead-light">
+						<tr>
+							<th class="no-sort">
+								<label class="checkboxs">
+									<input type="checkbox" id="select-all">
+									<span class="checkmarks"></span>
+								</label>
+							</th>
+							<th>Category</th>
+							<th>Trainer</th>
+							<th class="d-none d-md-table-cell">Description</th>
+							<th>Date</th>
+							<th class="d-none d-lg-table-cell">Time</th>
+							<th class="d-none d-lg-table-cell">Duration</th>
+							<th>Capacity</th>
+							<th>Status</th>
+							<th class="no-sort"></th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var session in Model)
+						{
+							<tr>
+								<td>
+									<label class="checkboxs">
+										<input type="checkbox">
+										<span class="checkmarks"></span>
+									</label>
+								</td>
+								<td>@session.CategoryName</td>
+								<td>@session.TrainerName</td>
+								<td class="d-none d-md-table-cell">@(session.Description?.Length > 50 ? session.Description.Substring(0, 50) + "..." : session.Description)</td>
+								<td>@session.DateDisplay</td>
+								<td class="d-none d-lg-table-cell">@session.TimeRangeDisplay</td>
+								<td class="d-none d-lg-table-cell">@session.Duration</td>
+								<td>@session.AvailableSlots/@session.Capacity</td>
+								<td>
+									@if (session.Status == "Ongoing")
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-success fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>@session.Status
+										</span>
+									}
+									else if (session.Status == "Upcoming")
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-primary fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>@session.Status
+										</span>
+									}
+									else
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-secondary fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>@session.Status
+										</span>
+									}
+								</td>
+								<td class="action-table-data">
+									<div class="edit-delete-action">
+										@if (session.Status == "Upcoming")
+										{
+											<a asp-controller="Booking" asp-action="GetMembersForUpcomingSession" asp-route-id="@session.Id" class="btn btn-icon btn-soft-info rounded-pill" title="View Members">
+												<i data-feather="eye" class="feather-edit"></i>
+											</a>
+										}
+										else if (session.Status == "Ongoing")
+										{
+											<a asp-controller="Booking" asp-action="GetMembersForOngoingSessions" asp-route-id="@session.Id" class="btn btn-icon btn-soft-info rounded-pill" title="View Members">
+												<i data-feather="eye" class="feather-edit"></i>
+											</a>
+										}
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+}
+else
+{
+	<partial name="_EmptyState" />
+}
 
-                                <div class="session-info mb-3">
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-person-circle text-primary-color me-2"></i>
-                                        <strong>Trainer:</strong> @session.TrainerName
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-calendar3 text-primary-color me-2"></i>
-                                        <strong>Date:</strong> @session.DateDisplay
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-clock text-primary-color me-2"></i>
-                                        <strong>Time:</strong> @session.TimeRangeDisplay
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-hourglass-split text-primary-color me-2"></i>
-                                        <strong>Duration:</strong> @session.Duration
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="bi bi-people text-primary-color me-2"></i>
-                                        <strong>Capacity:</strong> @session.AvailableSlots/@session.Capacity slots
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer border-0">
-                                <div class="d-grid gap-2">
-                                <a asp-action="GetMembersForUpcomingSession" asp-route-id="@session.Id" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-eye me-1"></i> View Members
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-            </div>
-        
-        <div class="mt-5 mb-4">
-            <h2 class="text-success fw-bold mb-2 d-flex align-items-center gap-2">
-                <i class="bi bi-calendar-check fs-1"></i>
-                <span>Ongoing Sessions</span>
-            </h2>
-            <p class="text-muted">Sessions available for attendance management</p>
-        </div>
-            <div class="row g-4 ">
-                @foreach (var session in Model.Where(X => X.Status == "Ongoing"))
-                {
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="card h-100 shadow-sm session-card rounded-4">
-                            <div class="card-header text-white py-3 bg-success rounded-top-4">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-calendar-event me-2"></i>@session.CategoryName
-                                    </h5>
-                                    <span class="badge bg-light text-dark">@session.Status</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <p class="text-muted mb-3">@session.Description</p>
-
-                                <div class="session-info mb-3">
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-person-circle text-primary-color me-2"></i>
-                                        <strong>Trainer:</strong> @session.TrainerName
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-calendar3 text-primary-color me-2"></i>
-                                        <strong>Date:</strong> @session.DateDisplay
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-clock text-primary-color me-2"></i>
-                                        <strong>Time:</strong> @session.TimeRangeDisplay
-                                    </div>
-                                    <div class="info-item mb-2">
-                                        <i class="bi bi-hourglass-split text-primary-color me-2"></i>
-                                        <strong>Duration:</strong> @session.Duration
-                                    </div>
-                                    <div class="info-item">
-                                        <i class="bi bi-people text-primary-color me-2"></i>
-                                        <strong>Capacity:</strong> @session.AvailableSlots/@session.Capacity slots
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="card-footer border-0">
-                                <div class="d-grid gap-2">
-                                <a asp-action="GetMembersForOngoingSessions" asp-route-id="@session.Id" class="btn btn-outline-primary btn-sm">
-                                        <i class="bi bi-eye me-1"></i> View Members
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-
-            </div>
-    }
-    else
-    {
-        <partial name="_EmptyState" model="@((string)null)" />
-    }
-</div>
+@section Scripts {
+	<partial name="_AlertBoxScript" />
+	<script>
+		$(document).ready(function () {
+			if (feather) {
+				feather.replace();
+			}
+		});
+	</script>
+}

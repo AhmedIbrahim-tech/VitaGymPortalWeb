@@ -7,7 +7,7 @@ builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 builder.Services.AddDatabaseContext(builder.Configuration);
 
 // Application Services
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(builder.Configuration);
 
 // FluentValidation Configuration
 builder.Services.AddFluentValidationConfiguration();

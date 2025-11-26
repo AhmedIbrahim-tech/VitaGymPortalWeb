@@ -1,5 +1,7 @@
 ﻿using Core.Mappers;
-using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Sessions;
+using Infrastructure.Entities.Users.GymUsers;
 
 namespace Core.Services.Classes;
 

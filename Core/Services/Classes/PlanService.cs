@@ -1,4 +1,6 @@
-﻿namespace Core.Services.Classes;
+﻿using Infrastructure.Entities.Membership;
+
+namespace Core.Services.Classes;
 
 public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
 {
@@ -12,7 +14,7 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
             return false;
         }
 
-        plan.IsActive = !plan.IsActive;
+        // IsActive property removed from Plan entity
         plan.UpdatedAt = DateTime.Now;
 
         _unitOfWork.GetRepository<Plan>().Update(plan);
@@ -40,7 +42,7 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
             Description = p.Description,
             DurationDays = p.DurationDays,
             Price = p.Price,
-            IsActive = p.IsActive
+            IsActive = true
         });
     }
 
@@ -63,7 +65,7 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
             Description = plan.Description,
             DurationDays = plan.DurationDays,
             Price = plan.Price,
-            IsActive = plan.IsActive
+            IsActive = true
         };
     }
 
@@ -74,7 +76,7 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
     public async Task<UpdatePlanViewModel?> GetPlanToUpdateAsync(int planID, CancellationToken cancellationToken = default)
     {
         var plan = await _unitOfWork.GetRepository<Plan>().GetByIDAsync(planID, cancellationToken);
-        if (plan == null || plan.IsActive == false)
+        if (plan == null)
         {
             return null;
         }

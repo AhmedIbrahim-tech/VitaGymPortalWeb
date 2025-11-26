@@ -1,3 +1,32 @@
+@using Microsoft.AspNetCore.Mvc.ViewComponents
+@using Microsoft.AspNetCore.Identity
+@using Infrastructure.Entities.Users.Identity
+@using System.Linq
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+	var photoUrl = "/assets/img/profiles/avator1.jpg";
+	var fullName = "User";
+	var userRole = "User";
+	
+	if (User.Identity?.IsAuthenticated == true)
+	{
+		var user = await UserManager.GetUserAsync(User);
+		if (user != null)
+		{
+			var roles = await UserManager.GetRolesAsync(user);
+			userRole = roles.FirstOrDefault() ?? "User";
+			fullName = $"{user.FirstName} {user.LastName}".Trim();
+			if (string.IsNullOrEmpty(fullName))
+			{
+				fullName = user.UserName ?? "User";
+			}
+			photoUrl = !string.IsNullOrEmpty(user.PhotoUrl) 
+				? $"/images/users/{user.PhotoUrl}" 
+				: "/assets/img/profiles/avator1.jpg";
+		}
+	}
+}
 		<!-- Header -->
 <div class="header">
 	<div class="main-header">
@@ -31,9 +60,9 @@
 					<a href="javascript:void(0);" class="responsive-search">
 						<i class="fa fa-search"></i>
 					</a>
-					<form action="#" class="dropdown">
+					<form action="#" class="dropdown" id="searchForm">
 						<div class="searchinputs input-group dropdown-toggle" id="dropdownMenuClickable" data-bs-toggle="dropdown" data-bs-auto-close="outside">
-							<input type="text" placeholder="Search">
+							<input type="text" placeholder="Search" id="searchInput" autocomplete="off">
 							<div class="search-addon">
 								<span><i class="ti ti-search"></i></span>
 							</div>
@@ -41,29 +70,37 @@
 								<kbd class="d-flex align-items-center"><img src="~/assets/img/icons/command.svg" alt="img" class="me-1">K</kbd>
 							</span>
 						</div>
-						<div class="dropdown-menu search-dropdown" aria-labelledby="dropdownMenuClickable">
+						<div class="dropdown-menu search-dropdown" aria-labelledby="dropdownMenuClickable" id="searchDropdown">
+							<div id="searchResults">
 							<div class="search-info">
 								<h6>
 									<span><i data-feather="search" class="feather-16"></i></span>Recent Searches
 								</h6>
 								<ul class="search-tags">
-									<li><a href="javascript:void(0);">Members</a></li>
-									<li><a href="javascript:void(0);">Trainers</a></li>
-									<li><a href="javascript:void(0);">Sessions</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Member")">Members</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Trainer")">Trainers</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Session")">Sessions</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Membership")">Memberships</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "UserManagement")">Users</a></li>
+									<li><a href="javascript:void(0);" class="search-tag-link" data-url="@Url.Action("Index", "Plan")">Plans</a></li>
 								</ul>
 							</div>
-							<div class="search-info">
-								<h6><span><i data-feather="help-circle" class="feather-16"></i></span>Help</h6>
-								<p>How to add a new member to the system</p>
-								<p>How to schedule a training session</p>
-							</div>
+								<div class="search-info">
+									<h6><span><i data-feather="help-circle" class="feather-16"></i></span>Help</h6>
+									<p>How to add a new member to the system</p>
+									<p>How to schedule a training session</p>
+								</div>
 							<div class="search-info">
 								<h6><span><i data-feather="user" class="feather-16"></i></span>Quick Links</h6>
 								<ul class="customers">
 									<li><a href="@Url.Action("Index", "Member")">Members<img src="~/assets/img/profiles/avator1.jpg" alt="Img" class="img-fluid"></a></li>
 									<li><a href="@Url.Action("Index", "Trainer")">Trainers<img src="~/assets/img/profiles/avatar-01.jpg" alt="Img" class="img-fluid"></a></li>
 									<li><a href="@Url.Action("Index", "Session")">Sessions<img src="~/assets/img/profiles/avatar-10.jpg" alt="Img" class="img-fluid"></a></li>
+									<li><a href="@Url.Action("Index", "Membership")">Memberships<img src="~/assets/img/profiles/avator1.jpg" alt="Img" class="img-fluid"></a></li>
+									<li><a href="@Url.Action("Index", "UserManagement")">Users<img src="~/assets/img/profiles/avatar-01.jpg" alt="Img" class="img-fluid"></a></li>
+									<li><a href="@Url.Action("Index", "Plan")">Plans<img src="~/assets/img/profiles/avatar-10.jpg" alt="Img" class="img-fluid"></a></li>
 								</ul>
+							</div>
 							</div>
 						</div>
 					</form>
@@ -109,6 +146,14 @@
 								<p>Membership</p>
 							</a>
 						</div>
+						<div class="col-md-2">
+							<a href="@Url.Action("Create", "UserManagement")" class="link-item">
+								<span class="link-icon">
+									<i class="ti ti-user-plus"></i>
+								</span>
+								<p>User</p>
+							</a>
+						</div>
 					</div>
 				</div>
 			</li>
@@ -139,22 +184,17 @@
 
 			<li class="nav-item dropdown has-arrow main-drop profile-nav">
 				<a href="javascript:void(0);" class="nav-link userset" data-bs-toggle="dropdown">
-					<span class="user-info p-0">
+					<span class="user-info">
 						<span class="user-letter">
-							<img src="~/assets/img/profiles/avator1.jpg" alt="Img" class="img-fluid">
+							<img src="@photoUrl" alt="User" class="img-fluid" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px;" onerror="this.src='/assets/img/profiles/avator1.jpg'">
+						</span>
+						<span class="user-details" style="margin-left: 10px;">
+							<span class="user-name" style="font-size: 15px; font-weight: 600; color: #1B2950;">@fullName</span>
 						</span>
 					</span>
 				</a>
 				<div class="dropdown-menu menu-drop-user">
-					<div class="profileset d-flex align-items-center">
-						<span class="user-img me-2">
-							<img src="~/assets/img/profiles/avator1.jpg" alt="Img">
-						</span>
-						<div>
-							<h6 class="fw-medium">@User.Identity?.Name</h6>
-							<p>Admin</p>
-						</div>
-					</div>
+					@await Component.InvokeAsync("UserInfo")
 					<hr class="my-2">
 					<form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
 						<button type="submit" class="dropdown-item logout pb-0" style="border: none; background: none; width: 100%; text-align: left;">
@@ -168,10 +208,29 @@
 		<!-- Mobile Menu -->
 		<div class="dropdown mobile-user-menu">
 			<a href="javascript:void(0);" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"
-			   aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+			   aria-expanded="false">
+				<span class="user-info">
+					<span class="user-letter">
+						<img src="@photoUrl" alt="User" class="img-fluid" onerror="this.src='/assets/img/profiles/avator1.jpg'">
+					</span>
+					<span class="user-details d-none d-md-inline">
+						<span class="user-name">@fullName</span>
+					</span>
+				</span>
+			</a>
 			<div class="dropdown-menu dropdown-menu-right">
+				<div class="dropdown-header d-flex align-items-center gap-2 mb-2">
+					<img src="@photoUrl" alt="User" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" onerror="this.src='/assets/img/profiles/avator1.jpg'">
+					<div>
+						<div class="fw-semibold">@fullName</div>
+						<small class="text-muted">@userRole</small>
+					</div>
+				</div>
+				<hr class="my-2">
 				<form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-					<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">Logout</button>
+					<button type="submit" class="dropdown-item" style="border: none; background: none; width: 100%; text-align: left;">
+						<i class="ti ti-logout me-2"></i>Logout
+					</button>
 				</form>
 			</div>
 		</div>

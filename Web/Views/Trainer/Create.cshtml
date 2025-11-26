@@ -94,7 +94,7 @@
                                 Specialization <span class="text-danger">*</span>
                             </label>
                             <div class="d-flex flex-wrap gap-3">
-                                @foreach (var speciality in Enum.GetValues(typeof(Speicalites)))
+                                @foreach (var speciality in Enum.GetValues(typeof(Specialities)))
                                 {
                                     <div class="form-check">
                                         <input asp-for="Specialization" type="radio" value="@speciality" id="@speciality" class="form-check-input" />

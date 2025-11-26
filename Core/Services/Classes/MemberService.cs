@@ -1,4 +1,8 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Sessions;
+using Infrastructure.Entities.Users.GymUsers;
+using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Shared;
 
 namespace Core.Services.Classes;
 
@@ -40,14 +44,7 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
                     BuildingNumber = memberViewModel.BuildingNumber
                 },
                 Gender = memberViewModel.Gender,
-                HealthRecord = new HealthRecord
-                {
-                    Height = memberViewModel.HealthRecordViewModel.Height,
-                    Weight = memberViewModel.HealthRecordViewModel.Weight,
-                    BloodType = memberViewModel.HealthRecordViewModel.BloodType,
-                    Note = memberViewModel.HealthRecordViewModel.Note
-                },
-                Photo = photoName
+                PhotoUrl = photoName
             };
 
             await _unitOfWork.GetRepository<Member>().AddAsync(member, cancellationToken);
@@ -55,9 +52,21 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
 
             if (!result)
             {
-                _attachmentService.Delete(member.Photo, "members");
+                _attachmentService.Delete(member.PhotoUrl, "members");
                 return false;
             }
+
+            var healthRecord = new HealthRecord
+            {
+                MemberId = member.Id,
+                Height = memberViewModel.HealthRecordViewModel.Height,
+                Weight = memberViewModel.HealthRecordViewModel.Weight,
+                BloodType = memberViewModel.HealthRecordViewModel.BloodType,
+                Note = memberViewModel.HealthRecordViewModel.Note
+            };
+
+            await _unitOfWork.GetRepository<HealthRecord>().AddAsync(healthRecord, cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return result;
         }
@@ -88,7 +97,7 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
             Email = m.Email,
             DateOfBirth = m.DateOfBirth.ToShortDateString(),
             Phone = m.Phone,
-            Photo = m.Photo,
+            Photo = m.PhotoUrl,
             Gender = m.Gender.ToString()
         });
     }
@@ -112,7 +121,7 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
             Email = member.Email,
             DateOfBirth = member.DateOfBirth.ToShortDateString(),
             Phone = member.Phone,
-            Photo = member.Photo,
+            Photo = member.PhotoUrl,
             Gender = member.Gender.ToString(),
             Address = FormatAddress(member.Address)
         };
@@ -131,6 +140,10 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
                 memberViewModel.MembershipEndDate = activeMembership.EndDate.ToShortDateString();
             }
         }
+
+        // Load health record
+        var healthRecord = await GetMemberHealthRecordAsync(id, cancellationToken);
+        memberViewModel.HealthRecordViewModel = healthRecord;
 
         return memberViewModel;
     }
@@ -166,12 +179,12 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
 
             if (uploadedPhoto != null)
             {
-                if (!string.IsNullOrEmpty(member.Photo))
+                if (!string.IsNullOrEmpty(member.PhotoUrl))
                 {
-                    _attachmentService.Delete(member.Photo, "members");
+                    _attachmentService.Delete(member.PhotoUrl, "members");
                 }
 
-                member.Photo = uploadedPhoto;
+                member.PhotoUrl = uploadedPhoto;
             }
             else
             {
@@ -195,6 +208,38 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
         _unitOfWork.GetRepository<Member>().Update(member);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
+        // Update health record if provided
+        if (memberViewModel.HealthRecordViewModel != null)
+        {
+            var healthRecords = await _unitOfWork.GetRepository<HealthRecord>().GetAllAsync(
+                hr => hr.MemberId == id, cancellationToken);
+            var healthRecord = healthRecords.FirstOrDefault();
+
+            if (healthRecord != null)
+            {
+                healthRecord.Height = memberViewModel.HealthRecordViewModel.Height;
+                healthRecord.Weight = memberViewModel.HealthRecordViewModel.Weight;
+                healthRecord.BloodType = memberViewModel.HealthRecordViewModel.BloodType;
+                healthRecord.Note = memberViewModel.HealthRecordViewModel.Note;
+                healthRecord.UpdatedAt = DateTime.Now;
+                _unitOfWork.GetRepository<HealthRecord>().Update(healthRecord);
+            }
+            else
+            {
+                // Create new health record if it doesn't exist
+                var newHealthRecord = new HealthRecord
+                {
+                    MemberId = id,
+                    Height = memberViewModel.HealthRecordViewModel.Height,
+                    Weight = memberViewModel.HealthRecordViewModel.Weight,
+                    BloodType = memberViewModel.HealthRecordViewModel.BloodType,
+                    Note = memberViewModel.HealthRecordViewModel.Note
+                };
+                await _unitOfWork.GetRepository<HealthRecord>().AddAsync(newHealthRecord, cancellationToken);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+
         return true;
     }
 
@@ -204,7 +249,10 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
 
     public async Task<HealthRecordViewModel?> GetMemberHealthRecordAsync(int id, CancellationToken cancellationToken = default)
     {
-        var healthRecord = await _unitOfWork.GetRepository<HealthRecord>().GetByIDAsync(id, cancellationToken);
+        var healthRecords = await _unitOfWork.GetRepository<HealthRecord>().GetAllAsync(
+            hr => hr.MemberId == id, cancellationToken);
+        var healthRecord = healthRecords.FirstOrDefault();
+        
         if (healthRecord is null)
         {
             return null;
@@ -231,16 +279,22 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
             return null;
         }
 
-        return new MemberToUpdateViewModel
+        var viewModel = new MemberToUpdateViewModel
         {
             Name = member.Name,
             Email = member.Email,
-            Photo = member.Photo,
+            Photo = member.PhotoUrl,
             Phone = member.Phone,
             BuildingNumber = member.Address?.BuildingNumber ?? string.Empty,
             Street = member.Address?.Street ?? string.Empty,
             City = member.Address?.City ?? string.Empty
         };
+
+        // Load health record
+        var healthRecord = await GetMemberHealthRecordAsync(id, cancellationToken);
+        viewModel.HealthRecordViewModel = healthRecord;
+
+        return viewModel;
     }
 
     #endregion
@@ -285,12 +339,58 @@ public class MemberService(IUnitOfWork _unitOfWork, IAttachmentService _attachme
             _unitOfWork.GetRepository<Member>().Delete(member);
             var isDeleted = await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
 
-            if (isDeleted)
+            if (isDeleted && !string.IsNullOrEmpty(member.PhotoUrl))
             {
-                _attachmentService.Delete(member.Photo, "members");
+                _attachmentService.Delete(member.PhotoUrl, "members");
             }
 
             return isDeleted;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    #endregion
+
+    #region Toggle Member Status
+
+    public async Task<bool> ToggleMemberStatusAsync(int id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var memberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
+                ms => ms.MemberId == id, cancellationToken);
+            var activeMembership = memberships.FirstOrDefault(ms => ms.EndDate >= DateTime.Now && ms.IsActive);
+
+            if (activeMembership != null)
+            {
+                // Deactivate: Set IsActive to false and set EndDate to now
+                activeMembership.IsActive = false;
+                activeMembership.EndDate = DateTime.Now;
+                activeMembership.UpdatedAt = DateTime.Now;
+                _unitOfWork.GetRepository<MemberShip>().Update(activeMembership);
+            }
+            else
+            {
+                // Activate: Find the most recent inactive membership and reactivate it, or extend end date
+                var inactiveMembership = memberships.OrderByDescending(ms => ms.CreatedAt).FirstOrDefault();
+                if (inactiveMembership != null)
+                {
+                    inactiveMembership.IsActive = true;
+                    inactiveMembership.EndDate = DateTime.Now.AddMonths(1); // Extend by 1 month
+                    inactiveMembership.UpdatedAt = DateTime.Now;
+                    _unitOfWork.GetRepository<MemberShip>().Update(inactiveMembership);
+                }
+                else
+                {
+                    // No membership exists, cannot activate
+                    return false;
+                }
+            }
+
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
         }
         catch
         {

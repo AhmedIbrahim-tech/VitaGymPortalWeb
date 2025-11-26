@@ -1,0 +1,12 @@
+@model Core.ViewModels.UserManagementViewModels.CurrentUserViewModel
+
+<div class="profileset d-flex align-items-center">
+    <span class="user-img me-2">
+        <img src="@Model.PhotoUrl" alt="User" onerror="this.src='/assets/img/profiles/avator1.jpg'">
+    </span>
+    <div>
+        <h6 class="fw-medium">@Model.FullName</h6>
+        <p>@Model.Role</p>
+    </div>
+</div>
+

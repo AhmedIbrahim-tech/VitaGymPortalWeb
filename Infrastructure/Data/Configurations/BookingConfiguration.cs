@@ -1,6 +1,4 @@
-﻿using Infrastructure.Entities;
-
-namespace Infrastructure.Data.Configurations
+﻿namespace Infrastructure.Data.Configurations
 {
     internal class BookingConfiguration : IEntityTypeConfiguration<Booking>
     {
@@ -12,16 +10,17 @@ namespace Infrastructure.Data.Configurations
                 .HasColumnName("BookingDate")
                 .HasDefaultValueSql("GETDATE()");
 
-            builder.HasOne(b => b.Session)
-                .WithMany(s => s.SessionMembers)
-                .HasForeignKey(b => b.SessionId);
-
             builder.HasOne(b => b.Member)
-                .WithMany(m => m.MemberSessions)
-                .HasForeignKey(b => b.MemberId);
+                .WithMany(m => m.Bookings)
+                .HasForeignKey(b => b.MemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(b => b.Session)
+                .WithMany(s => s.Bookings)
+                .HasForeignKey(b => b.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasKey(b => new { b.MemberId, b.SessionId });
         }
     }
-
 }

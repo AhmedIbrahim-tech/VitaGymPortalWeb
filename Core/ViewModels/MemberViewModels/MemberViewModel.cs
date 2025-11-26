@@ -13,5 +13,5 @@ public class MemberViewModel
     public string? PlanName { get; set; } = null;
     public string? MembershipEndDate { get; set; } = null;
     public string? MembershipStartDate { get; set; } = null;
-
-    }
+    public HealthRecordViewModel? HealthRecordViewModel { get; set; }
+}

@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Repositories.Classes;
+﻿using Infrastructure.Entities.Sessions;
+
+namespace Infrastructure.Repositories.Classes;
 
 public class BookingRepository(ApplicationDbContext _context) : GenericRepository<Booking>(_context), IBookingRepository
 {

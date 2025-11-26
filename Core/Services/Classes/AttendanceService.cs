@@ -1,5 +1,7 @@
 using Core.Mappers;
-using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Attendances;
+using Infrastructure.Entities.Membership;
+using Infrastructure.Entities.Users.GymUsers;
 
 namespace Core.Services.Classes;
 
@@ -26,11 +28,6 @@ public class AttendanceService(IUnitOfWork _unitOfWork) : IAttendanceService
                 return false;
             }
 
-            // Check if member already has an active check-in (no check-out)
-            if (await HasActiveCheckInAsync(viewModel.MemberId, cancellationToken))
-            {
-                return false;
-            }
 
             var attendance = viewModel.ToAttendance();
             await _unitOfWork.GetRepository<Attendance>().AddAsync(attendance, cancellationToken);
@@ -44,30 +41,6 @@ public class AttendanceService(IUnitOfWork _unitOfWork) : IAttendanceService
 
     #endregion
 
-    #region Check Out
-
-    public async Task<bool> CheckOutAsync(int attendanceId, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var attendance = await _unitOfWork.GetRepository<Attendance>().GetByIDAsync(attendanceId, cancellationToken);
-            if (attendance is null || attendance.CheckOutTime.HasValue)
-            {
-                return false;
-            }
-
-            attendance.CheckOutTime = DateTime.Now;
-            attendance.UpdatedAt = DateTime.Now;
-            _unitOfWork.GetRepository<Attendance>().Update(attendance);
-            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
-        }
-        catch
-        {
-            return false;
-        }
-    }
-
-    #endregion
 
     #region Get All Attendances
 
@@ -120,15 +93,5 @@ public class AttendanceService(IUnitOfWork _unitOfWork) : IAttendanceService
 
     #endregion
 
-    #region Has Active Check In
-
-    public async Task<bool> HasActiveCheckInAsync(int memberId, CancellationToken cancellationToken = default)
-    {
-        var activeAttendances = await _unitOfWork.GetRepository<Attendance>().GetAllAsync(
-            a => a.MemberId == memberId && a.CheckOutTime == null, cancellationToken);
-        return activeAttendances.Any();
-    }
-
-    #endregion
 }
 

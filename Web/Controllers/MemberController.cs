@@ -121,6 +121,23 @@ public class MemberController(IMemberService _memberService, IToastNotification 
 
     #endregion
 
+    #region Toggle Status
+
+    [HttpPost]
+    public async Task<IActionResult> ToggleStatus(int id, CancellationToken cancellationToken = default)
+    {
+        bool result = await _memberService.ToggleMemberStatusAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Member status updated successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Failed to update member status. Member may not have an active membership.");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
     #region Delete Member
 
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken = default)

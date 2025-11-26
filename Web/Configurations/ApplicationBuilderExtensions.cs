@@ -1,4 +1,4 @@
-using Infrastructure.Entities.Users;
+using Infrastructure.Entities.Users.Identity;
 
 namespace Web.Configurations;
 

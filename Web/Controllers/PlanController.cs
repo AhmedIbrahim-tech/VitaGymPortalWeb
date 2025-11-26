@@ -75,10 +75,10 @@ public class PlanController(IPlanService _planService, IToastNotification _toast
 
     #endregion
 
-    #region Activate/Deactivate Plan
+    #region Toggle Status
 
     [HttpPost]
-    public async Task<IActionResult> Activate(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ToggleStatus(int id, CancellationToken cancellationToken = default)
     {
         if (id <= 0)
         {
@@ -89,9 +89,9 @@ public class PlanController(IPlanService _planService, IToastNotification _toast
         var activate = await _planService.ActivateAsync(id, cancellationToken);
 
         if (activate)
-            _toastNotification.AddSuccessToastMessage("Plan Activated Successfully!");
+            _toastNotification.AddSuccessToastMessage("Plan status updated successfully!");
         else
-            _toastNotification.AddErrorToastMessage("Plan Failed To Activate!");
+            _toastNotification.AddErrorToastMessage("Failed to update plan status!");
 
         return RedirectToAction(nameof(Index));
     }

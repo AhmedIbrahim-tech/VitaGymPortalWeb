@@ -1,4 +1,6 @@
-﻿namespace Infrastructure.Repositories.Classes;
+﻿using Infrastructure.Entities.Sessions;
+
+namespace Infrastructure.Repositories.Classes;
 
 public class SessionRepository(ApplicationDbContext _context) : GenericRepository<Session>(_context), ISessionRepository
 {

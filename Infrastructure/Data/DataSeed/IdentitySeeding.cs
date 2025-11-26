@@ -1,4 +1,4 @@
-﻿using Infrastructure.Entities.Users;
+﻿using Infrastructure.Entities.Users.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data.DataSeed;
@@ -8,6 +8,8 @@ public static class IdentitySeeding
     private const string DefaultPassword = "P@ssw0rd";
     private const string SuperAdminRole = "SuperAdmin";
     private const string AdminRole = "Admin";
+    private const string MemberRole = "Member";
+    private const string TrainerRole = "Trainer";
 
     public static async Task<bool> SeedDataAsync(
         UserManager<ApplicationUser> userManager,
@@ -28,7 +30,7 @@ public static class IdentitySeeding
 
     private static async Task SeedRolesAsync(RoleManager<IdentityRole> roleManager)
     {
-        var roles = new[] { SuperAdminRole, AdminRole };
+        var roles = new[] { SuperAdminRole, AdminRole, MemberRole, TrainerRole };
 
         foreach (var roleName in roles)
         {
