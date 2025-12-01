@@ -2,21 +2,6 @@
 
 A comprehensive web application built with **ASP.NET Core MVC** following clean architecture principles to efficiently manage gym operations, including member subscriptions, trainer scheduling, session booking, attendance tracking, payment processing, and financial reporting.
 
-## Table of Contents
-
-- [Features](#features)
-- [Technology Stack](#technology-stack)
-- [Architecture](#architecture)
-- [Project Structure](#project-structure)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
-- [Development Guidelines](#development-guidelines)
-- [License](#license)
-
----
-
 ## Features
 
 ### Member Management
