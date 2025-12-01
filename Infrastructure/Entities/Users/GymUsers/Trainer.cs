@@ -6,7 +6,7 @@ namespace Infrastructure.Entities.Users.GymUsers;
 
 public class Trainer : GymUser
 {
-    public Specialities? Speciality { get; set; }
+    public string? Speciality { get; set; }
 
     // HR
     public decimal BasicSalary { get; set; }

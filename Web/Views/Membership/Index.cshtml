@@ -43,9 +43,16 @@
 								</td>
 								<td>
 									<div class="d-flex align-items-center">
-										<div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
-											<span class="text-primary fw-semibold">@(!string.IsNullOrEmpty(item.MemberName) ? item.MemberName.Substring(0, 1).ToUpper() : "?")</span>
-										</div>
+										@if (!string.IsNullOrEmpty(item.MemberPhoto))
+										{
+											<img src="~/images/members/@item.MemberPhoto" alt="@item.MemberName" class="rounded-circle shadow-sm me-2" width="40" height="40" style="object-fit: cover;" />
+										}
+										else
+										{
+											<div class="avatar-sm bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center me-2">
+												<span class="text-primary fw-semibold">@(!string.IsNullOrEmpty(item.MemberName) ? item.MemberName.Substring(0, 1).ToUpper() : "?")</span>
+											</div>
+										}
 										<span class="fw-medium">@item.MemberName</span>
 									</div>
 								</td>

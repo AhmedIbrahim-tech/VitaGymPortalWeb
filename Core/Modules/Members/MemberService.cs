@@ -50,7 +50,7 @@ public class MemberService(
             {
                 Name = memberViewModel.Name,
                 Email = memberViewModel.Email,
-                DateOfBirth = memberViewModel.DateOfBirth,
+                DateOfBirth = memberViewModel.DateOfBirth.Date, // Remove time
                 Phone = memberViewModel.Phone,
                 Address = new Address
                 {

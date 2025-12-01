@@ -43,6 +43,35 @@ public class PlanController(IPlanService _planService, IToastNotification _toast
 
     #endregion
 
+    #region Create Plan
+
+    [RequirePermission(Permissions.PlansCreate)]
+    public IActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [RequirePermission(Permissions.PlansCreate)]
+    public async Task<IActionResult> Create(CreatePlanViewModel input, CancellationToken cancellationToken = default)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(input);
+        }
+
+        bool createPlan = await _planService.CreatePlanAsync(input, cancellationToken);
+
+        if (createPlan)
+            _toastNotification.AddSuccessToastMessage("Plan Created Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Plan Failed To Create!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
     #region Update Plan
 
     [RequirePermission(Permissions.PlansEdit)]
@@ -73,6 +102,31 @@ public class PlanController(IPlanService _planService, IToastNotification _toast
             _toastNotification.AddSuccessToastMessage("Plan Updated Successfully!");
         else
             _toastNotification.AddErrorToastMessage("Plan Failed To Update!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
+    #region Delete Plan
+
+    [HttpPost]
+    [Authorize(Roles = Roles.SuperAdmin)]
+    [RequirePermission(Permissions.PlansDelete)]
+    public async Task<IActionResult> Delete([FromForm] int id, CancellationToken cancellationToken = default)
+    {
+        if (id <= 0)
+        {
+            _toastNotification.AddErrorToastMessage("Plan ID can Not be Zero or Negative!");
+            return RedirectToAction(nameof(Index));
+        }
+
+        var result = await _planService.DeletePlanAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Plan Deleted Successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Plan Cannot be Deleted! It may have active memberships.");
 
         return RedirectToAction(nameof(Index));
     }

@@ -33,11 +33,18 @@ public class MembershipService(IUnitOfWork _unitOfWork, IMembershipRepository _m
                 return false;
             }
 
-            // Check for active membership
-            if (await HasActiveMemberShipAsync(createdMemberShip.MemberId, cancellationToken))
+            // Check for active membership - if member has finished membership, allow reactivation
+            var existingMemberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
+                x => x.MemberId == createdMemberShip.MemberId, cancellationToken);
+            var activeMembership = existingMemberships.FirstOrDefault(x => x.EndDate >= DateTime.Now && x.IsActive);
+            
+            if (activeMembership != null)
             {
-                return false;
+                return false; // Member already has an active membership
             }
+            
+            // If member has a finished membership, we can reactivate with new data
+            // (The old membership will remain in history, new one will be created)
 
             // Get plan to calculate end date
             var plan = await _unitOfWork.GetRepository<Plan>().GetByIDAsync(createdMemberShip.PlanId, cancellationToken);

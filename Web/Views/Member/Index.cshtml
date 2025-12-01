@@ -13,7 +13,7 @@
 	<div class="card">
 		<div class="card-body p-0">
 			<div class="table-responsive">
-				<table class="table datatable">
+				<table class="table datatable" id="membersTable">
 					<thead class="thead-light">
 						<tr>
 							<th class="no-sort">
@@ -133,6 +133,30 @@ else
 			if (feather) {
 				feather.replace();
 			}
+
+			// Check if DataTable is already initialized and destroy it first
+			if ($.fn.DataTable.isDataTable('#membersTable')) {
+				$('#membersTable').DataTable().destroy();
+			}
+
+			// Initialize DataTable
+			var table = $('#membersTable').DataTable({
+				"bFilter": true,
+				"sDom": 'fBtlpi',
+				"ordering": true,
+				"language": {
+					search: ' ',
+					sLengthMenu: '_MENU_',
+					searchPlaceholder: "Search",
+					sLengthMenu: 'Row Per Page _MENU_ Entries',
+					info: "_START_ - _END_ of _TOTAL_ items",
+					paginate: {
+						next: ' <i class=" fa fa-angle-right"></i>',
+						previous: '<i class="fa fa-angle-left"></i> '
+					},
+				},
+			});
+
 		});
 	</script>
 }

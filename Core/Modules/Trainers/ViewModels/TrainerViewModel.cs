@@ -1,3 +1,5 @@
+using Infrastructure.Entities.Enums;
+
 namespace Core.Modules.Trainers.ViewModels;
 
 public class TrainerViewModel
@@ -11,4 +13,6 @@ public class TrainerViewModel
     public string? Address { get; set; } = null;
     public string specialization { get; set; } = null!;
     public string? Photo { get; set; }
+    public UserStatus Status { get; set; }
+    public bool IsActive => Status == UserStatus.Active;
 }

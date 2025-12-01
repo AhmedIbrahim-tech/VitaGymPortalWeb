@@ -2,6 +2,7 @@ using Infrastructure.Entities.Membership;
 using Infrastructure.Entities.Sessions;
 using Infrastructure.Entities.Users.GymUsers;
 using Infrastructure.Entities.Shared;
+using Infrastructure.Entities.Enums;
 
 namespace Infrastructure.Data.DataSeed;
 
@@ -47,7 +48,7 @@ public static class DataSeeder
                     .RuleFor(t => t.Phone, f => GenerateEgyptianPhoneNumber(f))
                     .RuleFor(t => t.DateOfBirth, f => f.Date.Between(DateTime.Now.AddYears(-50), DateTime.Now.AddYears(-25)))
                     .RuleFor(t => t.Gender, f => f.PickRandom<Gender>())
-                    .RuleFor(t => t.Speciality, f => f.PickRandom<Specialities>())
+                    .RuleFor(t => t.Speciality, f => f.PickRandom<Specialities>().ToString())
                     .RuleFor(t => t.Address, f => new Address
                     {
                         Street = f.Address.StreetAddress().Length > 30 ? f.Address.StreetAddress().Substring(0, 30) : f.Address.StreetAddress(),

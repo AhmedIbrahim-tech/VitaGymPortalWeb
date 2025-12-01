@@ -10,7 +10,7 @@
 	<div class="card">
 		<div class="card-body p-0">
 			<div class="table-responsive">
-				<table class="table datatable">
+				<table class="table datatable" id="trainersTable">
 					<thead class="thead-light">
 						<tr>
 							<th class="no-sort">
@@ -22,8 +22,10 @@
 							<th class="d-none d-lg-table-cell">Photo</th>
 							<th>Name</th>
 							<th class="d-none d-md-table-cell">Email</th>
+							<th class="d-none d-lg-table-cell">Gender</th>
 							<th>Phone</th>
 							<th>Specialization</th>
+							<th>Status</th>
 							<th class="no-sort"></th>
 						</tr>
 					</thead>
@@ -49,8 +51,36 @@
 								</td>
 								<td>@trainer.Name</td>
 								<td class="d-none d-md-table-cell">@trainer.Email</td>
+								<td class="d-none d-lg-table-cell">@trainer.Gender</td>
 								<td>@trainer.Phone</td>
-								<td><span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-1">@trainer.specialization</span></td>
+								<td>
+									@if (!string.IsNullOrEmpty(trainer.specialization) && trainer.specialization != "N/A")
+									{
+										var specializations = trainer.specialization.Split(',');
+										@foreach (var spec in specializations)
+										{
+											<span class="badge bg-primary-subtle text-primary-emphasis rounded-pill px-3 py-1 me-1">@spec.Trim()</span>
+										}
+									}
+									else
+									{
+										<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-1">N/A</span>
+									}
+								</td>
+								<td>
+									@if (trainer.IsActive)
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-success fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>Active
+										</span>
+									}
+									else
+									{
+										<span class="d-inline-flex align-items-center p-1 pe-2 rounded-1 text-white bg-danger fs-10">
+											<i class="ti ti-point-filled me-1 fs-11"></i>Inactive
+										</span>
+									}
+								</td>
 								<td class="action-table-data">
 									<div class="edit-delete-action">
 										<a asp-controller="Trainer" asp-action="TrainerDetails" asp-route-Id="@trainer.Id" class="btn btn-icon btn-soft-info rounded-pill" title="View Details">
@@ -59,6 +89,11 @@
 										<a asp-controller="Trainer" asp-action="TrainerEdit" asp-route-Id="@trainer.Id" class="btn btn-icon btn-soft-success rounded-pill" title="Edit">
 											<i data-feather="edit" class="feather-edit"></i>
 										</a>
+										<form asp-controller="Trainer" asp-action="ToggleStatus" asp-route-id="@trainer.Id" method="post" class="d-inline">
+											<button type="submit" class="btn btn-icon @(trainer.IsActive ? "btn-soft-info" : "btn-soft-success") rounded-pill" title="@(trainer.IsActive ? "Deactivate" : "Activate")">
+												<i data-feather="@(trainer.IsActive ? "x-circle" : "check-circle")" class="feather-edit"></i>
+											</button>
+										</form>
 										<button type="button" 
 												class="btn btn-icon btn-soft-danger rounded-pill" 
 												title="Delete"
@@ -103,6 +138,29 @@ else
 			if (feather) {
 				feather.replace();
 			}
+
+			// Check if DataTable is already initialized and destroy it first
+			if ($.fn.DataTable.isDataTable('#trainersTable')) {
+				$('#trainersTable').DataTable().destroy();
+			}
+
+			// Initialize DataTable
+			var table = $('#trainersTable').DataTable({
+				"bFilter": true,
+				"sDom": 'fBtlpi',
+				"ordering": true,
+				"language": {
+					search: ' ',
+					sLengthMenu: '_MENU_',
+					searchPlaceholder: "Search",
+					sLengthMenu: 'Row Per Page _MENU_ Entries',
+					info: "_START_ - _END_ of _TOTAL_ items",
+					paginate: {
+						next: ' <i class=" fa fa-angle-right"></i>',
+						previous: '<i class="fa fa-angle-left"></i> '
+					},
+				},
+			});
 		});
 	</script>
 }

@@ -66,13 +66,25 @@
                                 <input asp-for="Street" name="Street" type="text" class="form-control" />
                                 <span asp-validation-for="Street" class="text-danger"></span>
                             </div>
-                                <div class="col-md-6">
-                                    <label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
-                                    <input asp-for="City" class="form-control" />
-                                    <span asp-validation-for="City" class="text-danger"></span>
-                                </div>
+                            <div class="col-md-6">
+                                <label asp-for="City" class="form-label fw-semibold">City <span class="text-danger">*</span></label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DateOfBirth" class="form-label">Date Of Birth <span class="text-danger">*</span></label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                                <select asp-for="Gender" class="form-select" asp-items="Html.GetEnumSelectList<Gender>()">
+                                    <option value="">-- Select Gender --</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger"></span>
                             </div>
                         </div>
+                    </div>
 
                         <!-- Professional Information -->
                         <div class="mb-5">
@@ -85,15 +97,20 @@
                                         Specialization <span class="text-danger">*</span>
                                     </label>
                                     <div class="d-flex flex-wrap gap-3">
+                                        @{
+                                            var selectedSpecializations = Model.Specialization?.Split(',') ?? Array.Empty<string>();
+                                        }
                                         @foreach (var speciality in Enum.GetValues(typeof(Specialities)))
                                         {
+                                            var isChecked = selectedSpecializations.Contains(speciality.ToString());
                                             <div class="form-check">
-                                                <input asp-for="Specialization" type="radio" value="@speciality" id="@speciality" class="form-check-input" />
+                                                <input type="checkbox" name="Specializations" value="@speciality" id="@speciality" class="form-check-input specialization-checkbox" @(isChecked ? "checked" : "") />
                                                 <label class="form-check-label" for="@speciality">@speciality</label>
                                             </div>
                                         }
                                     </div>
-                                    <span asp-validation-for="Specialization" class="text-danger"></span>
+                                    <input type="hidden" id="Specialization" name="Specialization" value="@Model.Specialization" />
+                                    <span class="text-danger" id="specialization-error"></span>
                                 </div>
                             </div>
                         </div>
@@ -126,6 +143,27 @@
                 };
                 reader.readAsDataURL(file);
             }
+        });
+
+        // Handle multi-specialization
+        document.querySelectorAll('.specialization-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var selected = Array.from(document.querySelectorAll('.specialization-checkbox:checked'))
+                    .map(cb => cb.value)
+                    .join(',');
+                document.getElementById('Specialization').value = selected;
+            });
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var selected = Array.from(document.querySelectorAll('.specialization-checkbox:checked'));
+            if (selected.length === 0) {
+                e.preventDefault();
+                document.getElementById('specialization-error').textContent = 'Please select at least one specialization.';
+                return false;
+            }
+            document.getElementById('specialization-error').textContent = '';
         });
     </script>
 }

@@ -6,7 +6,7 @@
 
 <partial name="_AlertMessages" />
 
-<partial name="_PageHeader" model="@("Membership Plans")" view-data='new ViewDataDictionary(ViewData) { { "PageSubtitle", "Manage your gym membership packages" }, { "PageIcon", "award" } }' />
+<partial name="_PageHeader" model="@("Membership Plans")" view-data='new ViewDataDictionary(ViewData) { { "PageSubtitle", "Manage your gym membership packages" }, { "PageIcon", "award" }, { "ShowActionButton", true }, { "ActionButtonText", "Add Plan" }, { "ActionButtonUrl", Url.Action("Create", "Plan") } }' />
 
 @if (Model != null && Model.Any())
 {
@@ -25,7 +25,6 @@
 							<th>Name</th>
 							<th>Price</th>
 							<th class="d-none d-md-table-cell">Duration</th>
-							<th class="d-none d-lg-table-cell">Description</th>
 							<th>Status</th>
 							<th class="no-sort"></th>
 						</tr>
@@ -43,7 +42,6 @@
 								<td>@plan.Name</td>
 								<td>@plan.Price.ToString("N0") EGP</td>
 								<td class="d-none d-md-table-cell">@plan.DurationDays days</td>
-								<td class="d-none d-lg-table-cell">@(plan.Description?.Length > 50 ? plan.Description.Substring(0, 50) + "..." : plan.Description)</td>
 								<td>
 									@if (plan.IsActive)
 									{
@@ -66,11 +64,27 @@
 										<a asp-action="Edit" asp-route-id="@plan.Id" class="btn btn-icon btn-soft-success rounded-pill" title="Edit">
 											<i data-feather="edit" class="feather-edit"></i>
 										</a>
-										<form asp-action="ToggleStatus" asp-route-id="@plan.Id" method="post" class="d-inline">
-											<button type="submit" class="btn btn-icon @(plan.IsActive ? "btn-soft-info" : "btn-soft-success") rounded-pill" title="@(plan.IsActive ? "Deactivate" : "Activate")">
-												<i data-feather="@(plan.IsActive ? "x-circle" : "check-circle")" class="feather-edit"></i>
+										@if (!plan.HasMembers)
+										{
+											<form asp-action="ToggleStatus" asp-route-id="@plan.Id" method="post" class="d-inline">
+												<button type="submit" class="btn btn-icon @(plan.IsActive ? "btn-soft-info" : "btn-soft-success") rounded-pill" title="@(plan.IsActive ? "Deactivate" : "Activate")">
+													<i data-feather="@(plan.IsActive ? "x-circle" : "check-circle")" class="feather-edit"></i>
+												</button>
+											</form>
+											<button type="button" 
+													class="btn btn-icon btn-soft-danger rounded-pill" 
+													title="Delete"
+													data-bs-toggle="modal" 
+													data-bs-target="#deleteModal_@plan.Id">
+													<i data-feather="trash-2" class="feather-trash-2"></i>
+												</button>
+										}
+										else
+										{
+											<button type="button" class="btn btn-icon btn-soft-secondary rounded-pill" title="Cannot activate/deactivate plan with members" disabled>
+												<i data-feather="lock" class="feather-edit"></i>
 											</button>
-										</form>
+										}
 									</div>
 								</td>
 							</tr>
@@ -84,6 +98,21 @@
 else
 {
 	<partial name="_EmptyState" />
+}
+
+@foreach (var plan in Model)
+{
+	var modalId = "deleteModal_" + plan.Id;
+	var message = "Are you sure you want to delete the plan '" + plan.Name + "'? This action cannot be undone.";
+	
+	var deleteModalViewData = new ViewDataDictionary(ViewData);
+	deleteModalViewData["DeleteUrl"] = Url.Action("Delete", "Plan");
+	deleteModalViewData["ModalId"] = modalId;
+	deleteModalViewData["Title"] = "Delete Plan";
+	deleteModalViewData["Message"] = message;
+	deleteModalViewData["EntityId"] = plan.Id;
+	
+	<partial name="_DeleteModal" view-data="deleteModalViewData" />
 }
 
 @section Scripts {

@@ -15,6 +15,25 @@ public class SessionViewModel
     public string DateDisplay => $"{StartDate:MMM dd , yyyy}";
     public string TimeRangeDisplay => $"{StartDate:hh:mm tt} - {EndDate:hh:mm tt}";
     public TimeSpan Duration => EndDate - StartDate;
+    public string DurationDisplay
+    {
+        get
+        {
+            var duration = Duration;
+            var hours = (int)duration.TotalHours;
+            var minutes = duration.Minutes;
+            
+            if (hours > 0 && minutes > 0)
+                return $"{hours}h {minutes}m";
+            else if (hours > 0)
+                return $"{hours}h";
+            else if (minutes > 0)
+                return $"{minutes}m";
+            else
+                return "Less than a minute";
+        }
+    }
+    public string CapacityDisplay => $"{AvailableSlots} / {Capacity}";
     public string Status
     {
         get

@@ -108,6 +108,24 @@ public class TrainerController(ITrainerService _trainerService, IToastNotificati
 
     #endregion
 
+    #region Toggle Status
+
+    [HttpPost]
+    [RequirePermission(Permissions.TrainersEdit)]
+    public async Task<IActionResult> ToggleStatus(int id, CancellationToken cancellationToken = default)
+    {
+        bool result = await _trainerService.ToggleTrainerStatusAsync(id, cancellationToken);
+
+        if (result)
+            _toastNotification.AddSuccessToastMessage("Trainer status updated successfully!");
+        else
+            _toastNotification.AddErrorToastMessage("Failed to update trainer status!");
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    #endregion
+
     #region Delete Trainer
 
     [HttpPost]

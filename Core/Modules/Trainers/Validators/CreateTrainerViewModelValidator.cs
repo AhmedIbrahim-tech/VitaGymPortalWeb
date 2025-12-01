@@ -55,7 +55,9 @@ public class CreateTrainerViewModelValidator : AbstractValidator<CreateTrainerVi
             .WithMessage("Building number must be > 1 character.");
 
         RuleFor(x => x.Specialization)
-            .NotNull()
-            .WithMessage("Specialization is required.");
+            .NotEmpty()
+            .WithMessage("At least one specialization is required.")
+            .Must(s => !string.IsNullOrWhiteSpace(s) && s.Split(',').Any(sp => !string.IsNullOrWhiteSpace(sp.Trim())))
+            .WithMessage("At least one specialization must be selected.");
     }
 }

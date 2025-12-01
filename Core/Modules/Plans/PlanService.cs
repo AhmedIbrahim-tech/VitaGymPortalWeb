@@ -4,15 +4,44 @@ namespace Core.Modules.Plans;
 
 public interface IPlanService
 {
+    Task<bool> CreatePlanAsync(CreatePlanViewModel viewModel, CancellationToken cancellationToken = default);
     Task<bool> UpdatePlanAsync(int planID, UpdatePlanViewModel viewModel, CancellationToken cancellationToken = default);
+    Task<bool> DeletePlanAsync(int planID, CancellationToken cancellationToken = default);
     Task<UpdatePlanViewModel?> GetPlanToUpdateAsync(int planID, CancellationToken cancellationToken = default);
     Task<IEnumerable<PlanViewModel>> GetAllPlansAsync(CancellationToken cancellationToken = default);
     Task<PlanViewModel?> GetPlanByIdAsync(int planID, CancellationToken cancellationToken = default);
     Task<bool> ActivateAsync(int planID, CancellationToken cancellationToken = default);
+    Task<bool> HasAnyMembersAsync(int planID, CancellationToken cancellationToken = default);
 }
 
 public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
 {
+    #region Create Plan
+
+    public async Task<bool> CreatePlanAsync(CreatePlanViewModel viewModel, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var plan = new Plan
+            {
+                Name = viewModel.PlanName,
+                Description = viewModel.Description,
+                DurationDays = viewModel.DurationDays,
+                Price = viewModel.Price,
+                CreatedAt = DateTime.Now
+            };
+
+            await _unitOfWork.GetRepository<Plan>().AddAsync(plan, cancellationToken);
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    #endregion
+
     #region Activate/Deactivate Plan
 
     public async Task<bool> ActivateAsync(int planID, CancellationToken cancellationToken = default)
@@ -44,15 +73,22 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
             return [];
         }
 
-        return plansList.Select(p => new PlanViewModel
+        var planViewModels = new List<PlanViewModel>();
+        foreach (var p in plansList)
         {
-            Id = p.Id,
-            Name = p.Name,
-            Description = p.Description,
-            DurationDays = p.DurationDays,
-            Price = p.Price,
-            IsActive = true
-        });
+            var hasMembers = await HasAnyMembersAsync(p.Id, cancellationToken);
+            planViewModels.Add(new PlanViewModel
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Description = p.Description,
+                DurationDays = p.DurationDays,
+                Price = p.Price,
+                IsActive = true,
+                HasMembers = hasMembers
+            });
+        }
+        return planViewModels;
     }
 
     #endregion
@@ -130,12 +166,50 @@ public class PlanService(IUnitOfWork _unitOfWork) : IPlanService
 
     #endregion
 
+    #region Delete Plan
+
+    public async Task<bool> DeletePlanAsync(int planID, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var plan = await _unitOfWork.GetRepository<Plan>().GetByIDAsync(planID, cancellationToken);
+            if (plan == null)
+            {
+                return false;
+            }
+
+            // Check if plan has any memberships
+            if (await HasAnyMembersAsync(planID, cancellationToken))
+            {
+                return false;
+            }
+
+            _unitOfWork.GetRepository<Plan>().Delete(plan);
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    #endregion
+
     #region Helper Methods
 
     private async Task<bool> HasActiveMemberShipsAsync(int planID, CancellationToken cancellationToken = default)
     {
+        // Check for any memberships (active or inactive) for this plan
         var memberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
-            ms => ms.PlanId == planID && ms.EndDate >= DateTime.Now, cancellationToken);
+            ms => ms.PlanId == planID, cancellationToken);
+        return memberships.Any();
+    }
+
+    public async Task<bool> HasAnyMembersAsync(int planID, CancellationToken cancellationToken = default)
+    {
+        // Check for any memberships (active or inactive) for this plan
+        var memberships = await _unitOfWork.GetRepository<MemberShip>().GetAllAsync(
+            ms => ms.PlanId == planID, cancellationToken);
         return memberships.Any();
     }
 

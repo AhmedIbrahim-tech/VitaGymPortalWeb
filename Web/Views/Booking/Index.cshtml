@@ -45,8 +45,8 @@
 								<td class="d-none d-md-table-cell">@(session.Description?.Length > 50 ? session.Description.Substring(0, 50) + "..." : session.Description)</td>
 								<td>@session.DateDisplay</td>
 								<td class="d-none d-lg-table-cell">@session.TimeRangeDisplay</td>
-								<td class="d-none d-lg-table-cell">@session.Duration</td>
-								<td>@session.AvailableSlots/@session.Capacity</td>
+								<td class="d-none d-lg-table-cell">@session.DurationDisplay</td>
+								<td>@session.CapacityDisplay</td>
 								<td>
 									@if (session.Status == "Ongoing")
 									{

@@ -10,6 +10,7 @@ public interface ITrainerService
     Task<bool> CreateTrainerAsync(CreateTrainerViewModel trainerViewModel, CancellationToken cancellationToken = default);
     Task<bool> UpdateTrainerAsync(int id, TrainerToUpdateViewModel trainerViewModel, CancellationToken cancellationToken = default);
     Task<bool> RemoveTrainerAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> ToggleTrainerStatusAsync(int id, CancellationToken cancellationToken = default);
     Task<IEnumerable<TrainerViewModel>> GetAllTrainersAsync(CancellationToken cancellationToken = default);
     Task<TrainerViewModel?> GetTrainerDetailsAsync(int id, CancellationToken cancellationToken = default);
     Task<TrainerToUpdateViewModel?> GetTrainerToUpdateAsync(int id, CancellationToken cancellationToken = default);
@@ -43,7 +44,7 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
             {
                 Name = trainerViewModel.Name,
                 Email = trainerViewModel.Email,
-                DateOfBirth = trainerViewModel.DateOfBirth,
+                DateOfBirth = trainerViewModel.DateOfBirth.Date, // Remove time
                 Phone = trainerViewModel.Phone,
                 Address = new Address
                 {
@@ -52,7 +53,7 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
                     BuildingNumber = trainerViewModel.BuildingNumber
                 },
                 Gender = trainerViewModel.Gender,
-                Speciality = trainerViewModel.Specialization,
+                Speciality = trainerViewModel.Specialization, // Store as comma-separated string
                 PhotoUrl = photoUrl
             };
 
@@ -96,7 +97,8 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
             Phone = t.Phone,
             Gender = t.Gender.ToString(),
             specialization = t.Speciality?.ToString() ?? "N/A",
-            Photo = t.PhotoUrl
+            Photo = t.PhotoUrl,
+            Status = t.Status
         });
     }
 
@@ -122,7 +124,8 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
             Gender = trainer.Gender.ToString(),
             Address = FormatAddress(trainer.Address),
             specialization = trainer.Speciality?.ToString() ?? "N/A",
-            Photo = trainer.PhotoUrl
+            Photo = trainer.PhotoUrl,
+            Status = trainer.Status
         };
     }
 
@@ -173,6 +176,8 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
         trainer.Name = trainerViewModel.Name;
         trainer.Email = trainerViewModel.Email;
         trainer.Phone = trainerViewModel.Phone;
+        trainer.DateOfBirth = trainerViewModel.DateOfBirth.Date; // Remove time
+        trainer.Gender = trainerViewModel.Gender;
 
         if (trainer.Address is null)
         {
@@ -182,7 +187,7 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
         trainer.Address.City = trainerViewModel.City;
         trainer.Address.BuildingNumber = trainerViewModel.BuildingNumber;
         trainer.UpdatedAt = DateTime.Now;
-        trainer.Speciality = trainerViewModel.Specialization;
+        trainer.Speciality = trainerViewModel.Specialization; // Store as comma-separated string
 
         _unitOfWork.GetRepository<Trainer>().Update(trainer);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -206,11 +211,11 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
             Name = trainer.Name,
             Email = trainer.Email,
             Phone = trainer.Phone,
-            Specialization = trainer.Speciality,
+            Specialization = trainer.Speciality, // Already comma-separated string
             BuildingNumber = trainer.Address?.BuildingNumber ?? string.Empty,
             Street = trainer.Address?.Street ?? string.Empty,
             City = trainer.Address?.City ?? string.Empty,
-            DateOfBirth = trainer.DateOfBirth,
+            DateOfBirth = trainer.DateOfBirth.Date, // Remove time
             Gender = trainer.Gender,
             CurrentPhotoUrl = trainer.PhotoUrl
         };
@@ -245,6 +250,40 @@ public class TrainerService(IUnitOfWork _unitOfWork, IAttachmentService _attachm
             _unitOfWork.GetRepository<Trainer>().Delete(trainer);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
             return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    #endregion
+
+    #region Toggle Trainer Status
+
+    public async Task<bool> ToggleTrainerStatusAsync(int id, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var trainer = await _unitOfWork.GetRepository<Trainer>().GetByIDAsync(id, cancellationToken);
+            if (trainer is null)
+            {
+                return false;
+            }
+
+            // Toggle between Active and Inactive
+            if (trainer.Status == UserStatus.Active)
+            {
+                trainer.Status = UserStatus.Inactive;
+            }
+            else
+            {
+                trainer.Status = UserStatus.Active;
+            }
+
+            trainer.UpdatedAt = DateTime.Now;
+            _unitOfWork.GetRepository<Trainer>().Update(trainer);
+            return await _unitOfWork.SaveChangesAsync(cancellationToken) > 0;
         }
         catch (Exception)
         {

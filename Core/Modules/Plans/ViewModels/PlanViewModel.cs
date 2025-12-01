@@ -8,4 +8,5 @@ public class PlanViewModel
 	public int DurationDays { get; set; }
 	public decimal Price { get; set; }
 	public bool IsActive { get; set; }
+	public bool HasMembers { get; set; }
 }

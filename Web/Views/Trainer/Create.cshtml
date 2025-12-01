@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <form method="post" asp-action="CreateTrainer" novalidate>
+            <form method="post" asp-action="CreateTrainer" enctype="multipart/form-data" novalidate>
 
                 <!-- Personal Information -->
                 <div class="mb-5">
@@ -23,6 +23,17 @@
                         <i class="bi bi-person-circle me-2"></i>Personal Information
                     </h5>
                     <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="PhotoFile" class="form-label">Profile Photo</label>
+                            <div class="mb-3">
+                                <img id="photoPreview" src="" alt="Photo Preview" 
+                                     style="max-width: 150px; max-height: 150px; display: none;" 
+                                     class="rounded-circle border border-3 border-primary shadow-sm" />
+                            </div>
+                            <input asp-for="PhotoFile" type="file" class="form-control" accept="image/jpeg,image/jpg,image/png" id="photoInput" />
+                            <span asp-validation-for="PhotoFile" class="text-danger"></span>
+                            <small class="form-text text-muted">Max size: 5 MB. Allowed types: JPG, PNG, JPEG</small>
+                        </div>
             <div class="col-12 col-md-6">
                 <label asp-for="Name" class="form-label">Name <span class="text-danger">*</span></label>
                 <input asp-for="Name" class="form-control" />
@@ -43,7 +54,7 @@
 
             <div class="col-12 col-md-6">
                 <label asp-for="DateOfBirth" class="form-label">Date Of Birth <span class="text-danger">*</span></label>
-                <input asp-for="DateOfBirth" class="form-control" />
+                <input asp-for="DateOfBirth" type="date" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
 
@@ -97,12 +108,13 @@
                                 @foreach (var speciality in Enum.GetValues(typeof(Specialities)))
                                 {
                                     <div class="form-check">
-                                        <input asp-for="Specialization" type="radio" value="@speciality" id="@speciality" class="form-check-input" />
+                                        <input type="checkbox" name="Specializations" value="@speciality" id="@speciality" class="form-check-input specialization-checkbox" />
                                         <label class="form-check-label" for="@speciality">@speciality</label>
                                     </div>
                                 }
                             </div>
-                            <span asp-validation-for="Specialization" class="text-danger"></span>
+                            <input type="hidden" id="Specialization" name="Specialization" />
+                            <span class="text-danger" id="specialization-error"></span>
                         </div>
                     </div>
                 </div>
@@ -122,4 +134,40 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Preview photo before upload
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('photoPreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle multi-specialization
+        document.querySelectorAll('.specialization-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                var selected = Array.from(document.querySelectorAll('.specialization-checkbox:checked'))
+                    .map(cb => cb.value)
+                    .join(',');
+                document.getElementById('Specialization').value = selected;
+            });
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var selected = Array.from(document.querySelectorAll('.specialization-checkbox:checked'));
+            if (selected.length === 0) {
+                e.preventDefault();
+                document.getElementById('specialization-error').textContent = 'Please select at least one specialization.';
+                return false;
+            }
+            document.getElementById('specialization-error').textContent = '';
+        });
+    </script>
 }

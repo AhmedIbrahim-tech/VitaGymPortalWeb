@@ -12,7 +12,7 @@ public class TrainerToUpdateViewModel
     public string Street { get; set; } = null!;
     public string City { get; set; } = null!;
     public string BuildingNumber { get; set; } = null!;
-    public Specialities? Specialization { get; set; }
+    public string? Specialization { get; set; }
     public IFormFile? PhotoFile { get; set; }
     public string? CurrentPhotoUrl { get; set; }
 }
